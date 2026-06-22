@@ -1,0 +1,31 @@
+# Ignore dependency directories
+**/node_modules/
+node_modules/
+
+# Ignore local environment files (except examples)
+**/.env
+**/.env.local
+**/.env.production
+**/.env.development
+**/.env.staging
+**/.env.prod
+**/.env.dev
+
+# Ignore logs
+*.log
+**/logs/
+
+# Ignore IDE configs
+.idea/
+.vscode/
+
+# Ignore compiled files/directories
+**/dist/
+**/build/
+**/out/
+
+# Ignore archives
+*.zip
+*.rar
+*.tar.gz
+*.tgz
