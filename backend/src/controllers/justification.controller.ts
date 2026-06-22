@@ -31,23 +31,41 @@ const createJustification = async (req: any, res: any) => {
       }
     });
 
-    if (!searchPortfolio) {
-      return res.status(400).json({ message: 'El usuario no tiene un portafolio asociado' });
-    }
+    if (req.rol !== 'Administrador') {
+      const searchPortfolio = await Portfolio.findOne({
+        where: {
+          userId
+        }
+      });
 
-    const searchThirdPortfolio = await ThirdsPortfolio.findOne({
-      where: {
-        portfolioId: searchPortfolio.id,
-        thirdId
+      if (!searchPortfolio) {
+        return res.status(400).json({ message: 'El usuario no tiene un portafolio asociado' });
       }
-    });
 
-    if (!searchThirdPortfolio) {
-      return res.status(400).json({ message: 'El tercero no está asociado al usuario' });
-    }
+      const searchThirdPortfolio = await ThirdsPortfolio.findOne({
+        where: {
+          portfolioId: searchPortfolio.id,
+          thirdId
+        }
+      });
 
-    if (searchThirdPortfolio.dataValues.approved === false) {
-      return res.status(400).json({ message: 'El tercero no está aprobado' });
+      if (!searchThirdPortfolio) {
+        return res.status(400).json({ message: 'El tercero no está asociado al usuario' });
+      }
+
+      if (searchThirdPortfolio.dataValues.approved === false) {
+        return res.status(400).json({ message: 'El tercero no está aprobado' });
+      }
+    } else {
+      const thirdExists = await Third.findByPk(thirdId);
+      if (!thirdExists) {
+        return res.status(400).json({ message: 'El tercero no existe' });
+      }
+
+      const userExists = await User.findByPk(userId);
+      if (!userExists) {
+        return res.status(400).json({ message: 'El usuario no existe' });
+      }
     }
 
     const newJustification = await Justification.create({

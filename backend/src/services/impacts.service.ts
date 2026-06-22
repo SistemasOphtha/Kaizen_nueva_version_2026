@@ -1,9 +1,4 @@
-/**
- * Servicio simplificado para la gestión de impactos
- * Centraliza la lógica de negocio relacionada con impactos
- */
-import Sequelize from 'sequelize';
-import { Op } from 'sequelize';
+import Sequelize, { Op, QueryTypes } from 'sequelize';
 import logger from '../utils/logger';
 import Third from '../models/Third';
 import ThirdType from '../models/ThirdType';
@@ -11,6 +6,7 @@ import Portfolio from '../models/Portfolio';
 import ThirdsPortfolio from '../models/ThirdsPortfolio';
 import User from '../models/User';
 import Visit from '../models/Visit';
+import dbConection from '../database';
 
 /**
  * Obtiene la lista de IDs de usuario bajo la responsabilidad del rol actual
@@ -536,22 +532,163 @@ const filterImpacts = async (filters) => {
     
     logger.info(`Filtrando impactos con criterios: ${JSON.stringify(filters)}`);
     
-    // Estructura básica de respuesta
-    return {
-      title: {
-        filters: "Impactos",
-        tables: "Lista Paneles"
-      },
-      overview: {
-        filters: [],
-        tables: {
-          columns: [],
-          rows: []
+    // Obtener todos los tipos de tercero
+    const types = await ThirdType.findAll({
+      attributes: ['id', 'name']
+    });
+    
+    // Para cada tipo, obtener los terceros y sus visitas
+    const impactsByType = await Promise.all(types.map(async (type) => {
+      let query = `
+        SELECT tp."thirdId", 
+               t.name as full_name, 
+               t.identification, 
+               t.impact,
+               (SELECT COUNT(*) FROM "visits" v 
+                WHERE v."thirdId" = tp."thirdId" 
+                AND v.date BETWEEN ? AND ?
+                AND v."userId" = p."userId") as visits,
+               p."userId" as user_id
+        FROM "thirds_portfolios" tp
+        JOIN "third" t ON t.id = tp."thirdId"
+        JOIN "portfolios" p ON p.id = tp."portfolioId"
+        WHERE t."typeId" = ?
+        AND tp.approved = true
+      `;
+      
+      const replacements: any[] = [startDate, endDate, type.id];
+      
+      if (region && Number(region) !== 0) {
+        query += ` AND t."regionId" = ?`;
+        replacements.push(Number(region));
+      }
+      
+      if (user && Number(user) !== 0) {
+        query += ` AND p."userId" = ?`;
+        replacements.push(Number(user));
+      }
+      
+      const thirds = await dbConection.query(query, {
+        replacements,
+        type: QueryTypes.SELECT
+      }) as any[];
+      
+      if (thirds.length === 0) {
+        return {
+          countImpactsObject: {
+            "title": type.name,
+            "data": {
+              "name": "Impactos",
+              "count": 0,
+              "extra": {
+                "name": "Visitas realizadas",
+                "count": 0
+              }
+            },
+            "detail": "Cantidad de impactos"
+          },
+          tableThirdsObject: {
+            "columns": [
+              "ID",
+              "REPRESENTANTE",
+              "IDENTIFICACIÓN",
+              "TIPO",
+              "PANEL",
+              "IMPACTO",
+              "VISITAS"
+            ],
+            "rows": []
+          }
+        };
+      }
+      
+      // Obtener nombre del representante para cada tercero
+      for (const third of thirds) {
+        const userFound = await dbConection.query(
+          'SELECT id, "firstName", "lastName" FROM "users" WHERE id = ?',
+          {
+            replacements: [third.user_id],
+            type: QueryTypes.SELECT
+          }
+        ) as any[];
+        
+        if (userFound.length > 0) {
+          third.user = userFound[0];
         }
+      }
+      
+      // Calcular totales
+      let sumImpact = 0;
+      let sumVisit = 0;
+      
+      thirds.forEach(third => {
+        sumImpact += parseInt(third.impact || 0);
+        sumVisit += parseInt(third.visits || 0);
+      });
+      
+      const countImpactsObject = {
+        "title": type.name,
+        "data": {
+          "name": sumImpact === 1 ? "Impacto" : "Impactos",
+          "count": sumImpact,
+          "extra": {
+            "name": "Visitas realizadas",
+            "count": sumVisit
+          }
+        },
+        "detail": "Cantidad de impactos"
+      };
+      
+      const tableThirdsObject = {
+        "columns": [
+          "ID",
+          "REPRESENTANTE",
+          "IDENTIFICACIÓN",
+          "TIPO",
+          "PANEL",
+          "IMPACTO",
+          "VISITAS"
+        ],
+        "rows": thirds.map((third) => {
+          return {
+            "id": third.thirdId,
+            "user": third.user ? `${third.user.firstName} ${third.user.lastName}` : "N/A",
+            "identification": third.identification,
+            "type": type.name,
+            "name": third.full_name,
+            "impact": third.impact,
+            "visits": third.visits,
+          };
+        })
+      };
+      
+      return {
+        countImpactsObject,
+        tableThirdsObject
+      };
+    }));
+    
+    // Unificar tablas
+    const tables = impactsByType.map(item => item.tableThirdsObject);
+    
+    let unifiedObject = tables.reduce((accumulator, currentTable) => {
+      accumulator.columns = [...new Set([...accumulator.columns, ...currentTable.columns])];
+      accumulator.rows = accumulator.rows.concat(currentTable.rows);
+      return accumulator;
+    }, { columns: [], rows: [] });
+    
+    return {
+      "title": {
+        "filters": "Impactos",
+        "tables": "Lista Paneles"
       },
-      ranges: {
-        filters: "Impactos",
-        tables: "Paneles"
+      "overview": {
+        "filters": impactsByType.map(item => item.countImpactsObject),
+        "tables": unifiedObject
+      },
+      "ranges": {
+        "filters": "Impactos",
+        "tables": "Paneles"
       }
     };
   } catch (error) {
