@@ -322,12 +322,17 @@ function SignInPage() {
 								</div>
 							)}
 
+							{errors?.root && (
+								<Typography color="error" className="text-12 mt-16 font-semibold text-center">
+									{errors.root.message}
+								</Typography>
+							)}
+
 							<Button
 								variant="contained"
 								color="secondary"
 								className=" mt-16 w-full"
 								aria-label="Sign in"
-								disabled={!isValid}
 								type="submit"
 								size="large"
 							>
