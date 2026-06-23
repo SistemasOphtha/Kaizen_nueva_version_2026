@@ -327,7 +327,7 @@ function SignInPage() {
 								color="secondary"
 								className=" mt-16 w-full"
 								aria-label="Sign in"
-								disabled={_.isEmpty(dirtyFields) || !isValid}
+								disabled={!isValid}
 								type="submit"
 								size="large"
 							>
