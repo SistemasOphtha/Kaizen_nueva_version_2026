@@ -37,7 +37,8 @@ const schema = yup.object().shape({
 		.string()
 		.required('You must enter a identification')
 		.min(5, 'The identification must be at least 5 characters')
-		.max(15, 'The identification must be at most 15 characters')
+		.max(15, 'The identification must be at most 15 characters'),
+	department: yup.string().nullable()
 });
 
 /**

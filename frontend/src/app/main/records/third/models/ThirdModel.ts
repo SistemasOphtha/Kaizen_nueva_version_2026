@@ -49,6 +49,6 @@ const ThirdModel = (data: PartialDeep<ThirdType>): ThirdType =>
 		// 	name: ''
 		// },
 		thirds_portfolios: []
-	});
+	}) as ThirdType;
 
 export default ThirdModel;

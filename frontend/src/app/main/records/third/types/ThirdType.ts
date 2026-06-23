@@ -50,22 +50,22 @@ export type ThirdType = {
 		id: number;
 		name: string;
 	};
-	// third_classification: {
-	// 	id: number;
-	// 	name: string;
-	// };
-	// third_specialty: {
-	// 	id: number;
-	// 	name: string;
-	// };
-	// third_subspecialty: {
-	// 	id: number;
-	// 	name: string;
-	// };
-	// third_region: {
-	// 	id: number;
-	// 	name: string;
-	// };
+	third_classification?: {
+		id: number;
+		name: string;
+	};
+	third_specialty?: {
+		id: number;
+		name: string;
+	};
+	third_sub_specialty?: {
+		id: number;
+		name: string;
+	};
+	region?: {
+		id: number;
+		name: string;
+	};
 };
 
 /**

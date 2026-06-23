@@ -12,8 +12,7 @@ import * as yup from 'yup';
 import _ from '@lodash';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import { useState } from 'react';
-import { UserType } from 'app/store/user';
+import { useState, useEffect, useRef } from 'react';
 import jwtService from '../../auth/services/jwtService';
 
 /**
@@ -43,8 +42,14 @@ const defaultValues = {
 function SignInPage() {
 	const [require2FA, setRequire2FA] = useState(false);
 	const [userIdFor2FA, setUserIdFor2FA] = useState<number | null>(null);
+	const [twoFactorMethod, setTwoFactorMethod] = useState<'totp' | 'email'>('totp');
 	const [totpToken, setTotpToken] = useState('');
 	const [totpError, setTotpError] = useState('');
+
+	// reCAPTCHA states
+	const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+	const [recaptchaError, setRecaptchaError] = useState('');
+	const recaptchaRef = useRef<HTMLDivElement>(null);
 
 	const { control, formState, handleSubmit, setError } = useForm({
 		mode: 'onChange',
@@ -54,16 +59,85 @@ function SignInPage() {
 
 	const { isValid, dirtyFields, errors } = formState;
 
+	// Load Google reCAPTCHA v2 programmatically
+	useEffect(() => {
+		const siteKey = process.env.REACT_APP_RECAPTCHA_SITE_KEY;
+		if (!siteKey || require2FA) return;
+
+		const scriptId = 'google-recaptcha-script';
+		let script = document.getElementById(scriptId) as HTMLScriptElement;
+		if (!script) {
+			script = document.createElement('script');
+			script.id = scriptId;
+			script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+			script.async = true;
+			script.defer = true;
+			document.body.appendChild(script);
+		}
+
+		let widgetId: any = null;
+
+		const renderRecaptcha = () => {
+			const anyWindow = window as any;
+			if (anyWindow.grecaptcha && anyWindow.grecaptcha.render && recaptchaRef.current) {
+				try {
+					// Clear previous container content to avoid duplicates on re-renders
+					recaptchaRef.current.innerHTML = '';
+					widgetId = anyWindow.grecaptcha.render(recaptchaRef.current, {
+						sitekey: siteKey,
+						callback: (token: string) => {
+							setRecaptchaToken(token);
+							setRecaptchaError('');
+						},
+						'expired-callback': () => {
+							setRecaptchaToken(null);
+						}
+					});
+				} catch (e) {
+					console.warn('reCAPTCHA render error:', e);
+				}
+			}
+		};
+
+		const anyWindow = window as any;
+		if (anyWindow.grecaptcha && anyWindow.grecaptcha.render) {
+			renderRecaptcha();
+		} else {
+			const interval = setInterval(() => {
+				if (anyWindow.grecaptcha && anyWindow.grecaptcha.render) {
+					clearInterval(interval);
+					renderRecaptcha();
+				}
+			}, 300);
+			return () => {
+				clearInterval(interval);
+			};
+		}
+	}, [require2FA]);
+
 	function onSubmit({ email, password }: InferType<typeof schema>) {
+		const siteKey = process.env.REACT_APP_RECAPTCHA_SITE_KEY;
+		if (siteKey && !recaptchaToken) {
+			setRecaptchaError('Por favor confirme que no es un robot.');
+			return;
+		}
+
 		jwtService
-			.signInWithEmailAndPassword(email, password)
+			.signInWithEmailAndPassword(email, password, recaptchaToken)
 			.then((res: any) => {
 				if (res && res.require2FA) {
 					setRequire2FA(true);
 					setUserIdFor2FA(res.userId);
+					setTwoFactorMethod(res.twoFactorMethod || 'totp');
 				}
 			})
 			.catch((_errors: { type: 'email' | 'password' | `root.${string}` | 'root'; message: string }[]) => {
+				// Reset captcha on failure if it exists
+				const anyWindow = window as any;
+				if (anyWindow.grecaptcha && recaptchaToken) {
+					anyWindow.grecaptcha.reset();
+					setRecaptchaToken(null);
+				}
 				_errors.forEach((error) => {
 					setError(error.type, {
 						type: 'manual',
@@ -114,7 +188,9 @@ function SignInPage() {
 							onSubmit={handleVerify2FA}
 						>
 							<Typography className="text-md text-text.secondary mb-16">
-								Ingresa el código de 6 dígitos de tu aplicación de autenticación para confirmar tu identidad.
+								{twoFactorMethod === 'email'
+									? 'Ingresa el código de 6 dígitos enviado a tu correo electrónico registrado.'
+									: 'Ingresa el código de 6 dígitos de tu aplicación de autenticación para confirmar tu identidad.'}
 							</Typography>
 
 							<TextField
@@ -155,6 +231,7 @@ function SignInPage() {
 									setUserIdFor2FA(null);
 									setTotpToken('');
 									setTotpError('');
+									setRecaptchaToken(null);
 								}}
 							>
 								Regresar al inicio de sesión
@@ -230,6 +307,17 @@ function SignInPage() {
 									Olvido la contraseña?
 								</Link>
 							</div>
+
+							{process.env.REACT_APP_RECAPTCHA_SITE_KEY && (
+								<div className="flex flex-col items-center justify-center my-16">
+									<div ref={recaptchaRef} />
+									{recaptchaError && (
+										<Typography color="error" className="text-12 mt-4 font-semibold">
+											{recaptchaError}
+										</Typography>
+									)}
+								</div>
+							)}
 
 							<Button
 								variant="contained"

@@ -254,7 +254,7 @@ function CustomReportBuilderWidget() {
             select
             label="Filtrar por Región (Opcional)"
             value={regionId}
-            onChange={(e) => setRegionId(e.target.value as number)}
+            onChange={(e) => setRegionId(e.target.value === '' ? '' : Number(e.target.value))}
             variant="outlined"
             size="small"
             fullWidth
@@ -271,7 +271,7 @@ function CustomReportBuilderWidget() {
             select
             label="Filtrar por Asesor (Opcional)"
             value={userId}
-            onChange={(e) => setUserId(e.target.value as number)}
+            onChange={(e) => setUserId(e.target.value === '' ? '' : Number(e.target.value))}
             variant="outlined"
             size="small"
             fullWidth

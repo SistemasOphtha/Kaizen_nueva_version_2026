@@ -1,8 +1,15 @@
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-// import Autocomplete from '@mui/material/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Controller, useFormContext } from 'react-hook-form';
-// import { ThirdType } from '../../types/ThirdType';
+
+const departamentosColombia = [
+	"Amazonas", "Antioquia", "Arauca", "Atlántico", "Bolívar", "Boyacá", "Caldas",
+	"Caquetá", "Casanare", "Cauca", "Cesar", "Chocó", "Córdoba", "Cundinamarca",
+	"Guainía", "Guaviare", "Huila", "La Guajira", "Magdalena", "Meta", "Nariño",
+	"Norte de Santander", "Putumayo", "Quindío", "Risaralda", "San Andrés y Providencia",
+	"Santander", "Sucre", "Tolima", "Valle del Cauca", "Vaupés", "Vichada"
+];
 
 /**
  * The basic info tab.
@@ -90,6 +97,32 @@ function ContactInfoTab({ setTabValue }: Props) {
 						fullWidth
 						error={!!errors.mobile}
 						helperText={errors?.mobile?.message as string}
+					/>
+				)}
+			/>
+
+			<Controller
+				name="department"
+				control={control}
+				render={({ field: { onChange, value } }) => (
+					<Autocomplete
+						options={departamentosColombia}
+						value={value || null}
+						onChange={(event, newValue) => {
+							onChange(newValue);
+						}}
+						renderInput={(params) => (
+							<TextField
+								{...params}
+								className="mt-8 mb-16"
+								label="Departamento"
+								id="department"
+								variant="outlined"
+								fullWidth
+								error={!!errors.department}
+								helperText={errors?.department?.message as string}
+							/>
+						)}
 					/>
 				)}
 			/>

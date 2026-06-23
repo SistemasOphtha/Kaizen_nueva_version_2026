@@ -14,7 +14,8 @@ const locale = {
 	RECORDS: 'Registros',
 	CLASSIFICATIONS: 'Clasificaciones',
 	INDICATORS: 'Indicadores',
-	REPORTS: 'Reportes'
+	REPORTS: 'Reportes',
+	TUTORIAL: 'Tutorial'
 };
 
 export default locale;

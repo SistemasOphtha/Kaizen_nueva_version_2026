@@ -96,12 +96,13 @@ class JwtService extends FuseUtils.EventEmitter {
 	/**
 	 * Signs in with the provided email and password.
 	 */
-	signInWithEmailAndPassword = (email: string, password: string) =>
+	signInWithEmailAndPassword = (email: string, password: string, recaptchaToken?: string | null) =>
 		new Promise((resolve, reject) => {
 			axios
 				.post(jwtServiceConfig.signIn, {
 					email,
-					password
+					password,
+					recaptchaToken
 				})
 				.then(
 					(
@@ -114,6 +115,7 @@ class JwtService extends FuseUtils.EventEmitter {
 							}[];
 							require2FA?: boolean;
 							userId?: number;
+							twoFactorMethod?: 'totp' | 'email';
 						}>
 					) => {
 						console.log('response', response.data);
@@ -122,7 +124,7 @@ class JwtService extends FuseUtils.EventEmitter {
 							this.emit('onLogin', response.data.user);
 							resolve(response.data.user);
 						} else if (response.data.require2FA) {
-							resolve({ require2FA: true, userId: response.data.userId });
+							resolve({ require2FA: true, userId: response.data.userId, twoFactorMethod: response.data.twoFactorMethod });
 						} else {
 							console.log('erwerwerwerwe', response.data.error);
 

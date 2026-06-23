@@ -144,6 +144,14 @@ const navigationConfig: FuseNavigationType = [
 				url: '/records/thirds'
 			}
 		]
+	},
+	{
+		id: 'tutorial-component',
+		title: 'Tutorial',
+		translate: 'TUTORIAL',
+		type: 'item',
+		icon: 'heroicons-outline:book-open',
+		url: '/apps/tutorial'
 	}
 ];
 

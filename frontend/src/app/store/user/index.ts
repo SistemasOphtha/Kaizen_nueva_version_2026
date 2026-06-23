@@ -19,6 +19,8 @@ export type UserType = {
 		email?: string;
 		shortcuts?: string[];
 		settings?: Partial<FuseSettingsConfigType>;
+		twoFactorEnabled?: boolean;
+		twoFactorMethod?: 'totp' | 'email';
 	};
 	loginRedirectUrl?: string;
 };

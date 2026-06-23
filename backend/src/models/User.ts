@@ -82,6 +82,19 @@ const User = dbConection.define('users', {
       type: DataTypes.STRING(255),
       allowNull: true
    },
+   twoFactorMethod: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      defaultValue: 'totp'
+   },
+   email2FactorCode: {
+      type: DataTypes.STRING(10),
+      allowNull: true
+   },
+   email2FactorExpires: {
+      type: DataTypes.DATE,
+      allowNull: true
+   },
    status: {
       type: DataTypes.ENUM('active', 'inactive'),
       allowNull: false,

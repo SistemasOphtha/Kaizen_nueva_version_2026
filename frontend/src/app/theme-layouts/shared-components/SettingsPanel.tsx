@@ -103,6 +103,10 @@ function SettingsPanel() {
 	const [open, setOpen] = useState('');
 	const dispatch = useAppDispatch();
 
+	const handleClose = () => {
+		setOpen('');
+	};
+
 	const handlerOptions = {
 		onSwipedLeft: () => Boolean(open) && theme.direction === 'rtl' && handleClose(),
 		onSwipedRight: () => Boolean(open) && theme.direction === 'ltr' && handleClose()

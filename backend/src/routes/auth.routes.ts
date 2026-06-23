@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signinHandler, signupHandler, refreshTokenHandler, signinforTokenHandler, restorePassword, updateUser, signoutHandler, setup2FA, verify2FA, disable2FA, loginVerify2FA } from '../controllers/auth.controller';
+import { signinHandler, signupHandler, refreshTokenHandler, signinforTokenHandler, restorePassword, updateUser, signoutHandler, setup2FA, verify2FA, disable2FA, loginVerify2FA, setupEmail2FA, verifyEmail2FA } from '../controllers/auth.controller';
 import { checkExistingUser } from '../middlewares/verifySignup';
 import { verifyToken } from '../middlewares/authJwt';
 
@@ -27,5 +27,7 @@ router.post("/2fa/setup", [verifyToken], setup2FA);
 router.post("/2fa/verify", [verifyToken], verify2FA);
 router.post("/2fa/disable", [verifyToken], disable2FA);
 router.post("/2fa/login-verify", loginVerify2FA);
+router.post("/2fa/email/setup", [verifyToken], setupEmail2FA);
+router.post("/2fa/email/verify", [verifyToken], verifyEmail2FA);
 
 export default router;

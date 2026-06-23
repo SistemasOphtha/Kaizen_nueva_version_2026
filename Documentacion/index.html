@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual del Usuario Kaizen 3.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Modern Reset and Variables */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --bg-color: #0b0f19;
+            --sidebar-bg: #111827;
+            --card-bg: rgba(20, 27, 45, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary-accent: linear-gradient(135deg, #6366f1, #a855f7);
+            --primary-color: #6366f1;
+            --secondary-color: #14b8a6;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            line-height: 1.6;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            width: 320px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--primary-accent);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #fff;
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+        }
+
+        .brand-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            gap: 10px;
+        }
+
+        .nav-item a:hover, .nav-item.active a {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active a {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+            border-left: 3px solid var(--primary-color);
+            border-radius: 4px 8px 8px 4px;
+            padding-left: 11px;
+        }
+
+        /* Main Content Panel */
+        main {
+            margin-left: 320px;
+            flex: 1;
+            padding: 48px 64px;
+            max-width: 1200px;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 2.75rem;
+            margin-bottom: 12px;
+            background: linear-gradient(to right, #ffffff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            margin-bottom: 48px;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            margin-top: 48px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 28px;
+            margin-bottom: 16px;
+            color: #c084fc;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #cbd5e1;
+            font-size: 0.975rem;
+            line-height: 1.7;
+        }
+
+        ul, ol {
+            margin-bottom: 24px;
+            margin-left: 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #cbd5e1;
+        }
+
+        /* Cards and Blocks */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Badge/Roles Styles */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-admin {
+            background-color: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .badge-rep {
+            background-color: rgba(20, 184, 166, 0.15);
+            color: #2dd4bf;
+            border: 1px solid rgba(20, 184, 166, 0.3);
+        }
+
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-tech {
+            background-color: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .role-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        /* Warning/Notice callouts */
+        .callout {
+            padding: 20px;
+            border-left: 4px solid var(--primary-color);
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 24px;
+        }
+
+        .callout-warning {
+            border-left-color: var(--warning-color);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .callout-title {
+            font-weight: 700;
+            font-family: var(--font-display);
+            margin-bottom: 6px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Screenshots styling */
+        .screenshot-container {
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .screenshot-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .screenshot-caption {
+            padding: 12px 20px;
+            background: #111827;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Code display styling */
+        pre {
+            background: #111827;
+            padding: 16px 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #f472b6;
+        }
+
+        pre code {
+            color: #e2e8f0;
+        }
+
+        .step-num {
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            color: #fff;
+        }
+
+        /* Step List item */
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            padding-left: 4px;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+            font-size: 0.975rem;
+        }
+
+        /* Use case block */
+        .use-case-box {
+            background: rgba(20, 184, 166, 0.03);
+            border: 1px dashed rgba(20, 184, 166, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            margin-bottom: 24px;
+        }
+
+        .use-case-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            color: #2dd4bf;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Technical Table */
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.925rem;
+        }
+
+        .tech-table th, .tech-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tech-table th {
+            font-family: var(--font-display);
+            color: #c084fc;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .tech-table td {
+            color: #e2e8f0;
+        }
+
+        /* Scrollbar adjustment */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 992px) {
+            aside {
+                display: none;
+            }
+            main {
+                margin-left: 0;
+                padding: 32px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside>
+        <div class="brand">
+            <div class="brand-icon">K</div>
+            <div class="brand-title">Kaizen 3.0</div>
+        </div>
+
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar en el manual..." onkeyup="filterDocumentation()">
+        </div>
+
+        <ul class="nav-list">
+            <li class="nav-item active" id="nav-intro"><a href="#intro">🚀 Introducción</a></li>
+            <li class="nav-item" id="nav-autenticacion"><a href="#autenticacion">🔑 Seguridad y 2FA</a></li>
+            <li class="nav-item" id="nav-medicos"><a href="#medicos">👥 Registro de Médicos</a></li>
+            <li class="nav-item" id="nav-excel"><a href="#excel">📥 Importación Masiva</a></li>
+            <li class="nav-item" id="nav-portafolios"><a href="#portafolios">📂 Gestión Portafolios</a></li>
+            <li class="nav-item" id="nav-visitas"><a href="#visitas">📍 Visitas y GPS</a></li>
+            <li class="nav-item" id="nav-justificaciones"><a href="#justificaciones">📄 Justificaciones</a></li>
+            <li class="nav-item" id="nav-agenda"><a href="#agenda">📅 Agenda y Calendario</a></li>
+            <li class="nav-item" id="nav-reportes"><a href="#reportes">📊 Constructor de Reportes</a></li>
+            <li class="nav-item" id="nav-auditoria"><a href="#auditoria">🛡️ Auditoría de Sesiones</a></li>
+            <li class="nav-item" id="nav-arquitectura"><a href="#arquitectura">🛠️ Arquitectura Técnica</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main>
+        <header>
+            <h1>Manual del Usuario Kaizen 3.0</h1>
+            <p class="subtitle">Guía de usuario interactiva y técnica de la plataforma de geomarketing, auditoría y productividad.</p>
+        </header>
+
+        <!-- INTRO -->
+        <section id="intro">
+            <h2>🚀 Introducción</h2>
+            <div class="card">
+                <p>Bienvenido al manual oficial del sistema de gestión y productividad de <strong>Ophtha (Kaizen 3.0)</strong>, accesible desde la web oficial de producción: <a href="https://kaizenophtha.com" target="_blank" style="color: #6366f1; text-decoration: underline; font-weight: 600;">https://kaizenophtha.com</a>.</p>
+                
+                <p>Este sistema ha sido diseñado para centralizar y optimizar la auditoría de visitas médicas, la gestión geográfica de paneles de droguerías y médicos, y el planeamiento diario de trabajo de la fuerza comercial. Su estructura de base de datos corre bajo <strong>PostgreSQL</strong> y su lógica de negocio está totalmente optimizada con arquitecturas modernas de <strong>TypeScript</strong> y <strong>React</strong>.</p>
+                
+                <h3>Roles principales del Sistema</h3>
+                <ul>
+                    <li><span class="badge badge-admin">Administrador</span>: Johana Londoño Muñoz (y equipo directivo). Tienen control total sobre todos los paneles de médicos del país, pueden auditar e invalidar visitas, aprobar justificaciones, reasignar portafolios comerciales a cualquier usuario, realizar importaciones masivas y consultar historiales de sesiones e IPs de seguridad.</li>
+                    <li><span class="badge badge-rep">Representante</span>: Fuerza comercial y visitadores. Cuentan con acceso personalizado exclusivo al portafolio de médicos que tienen a su cargo. Pueden planificar su agenda semanal, reportar visitas en tiempo real basándose en su ubicación móvil, cargar firmas digitales y registrar justificaciones cuando corresponda.</li>
+                </ul>
+
+                <div class="use-case-box">
+                    <div class="use-case-title">💼 CASO DE USO GLOBAL: AUDITORÍA MENSUAL</div>
+                    <p><strong>Escenario:</strong> La Directora de Mercadeo desea evaluar si la fuerza comercial de la zona Norte cumplió con la frecuencia de impactos programada para el mes de Junio de 2026.
+                    <br><strong>Procedimiento:</strong>
+                    El representante reporta sus visitas in situ validadas por GPS. Al cerrarse el mes, el sistema compara el impacto requerido de cada médico contra las visitas reales. Los médicos insatisfechos requieren una justificación del visitador, que la supervisora valida desde su panel de control antes de liquidar el indicador.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEGURIDAD Y 2FA -->
+        <section id="autenticacion">
+            <h2>🔑 Seguridad y Doble Factor (2FA)</h2>
+            <div class="card">
+                <div class="role-indicator">
+                    <span class="badge badge-admin">Administrador</span>
+                    <span class="badge badge-rep">Representante</span>
+                </div>
+                <p>Kaizen 3.0 integra un módulo de seguridad avanzada de **Autenticación de Dos Factores (2FA)** para asegurar que los datos del negocio y los paneles comerciales permanezcan protegidos. Al activarlo, el inicio de sesión requerirá no solo la contraseña, sino también un token digital temporal generado desde su celular.</p>
+
+                <h3>Cómo Activar el 2FA en su Cuenta</h3>
+                <div class="step-item">
+                    <span class="step-num">1</span>
+                    <div class="step-content">
+                        <div class="step-title">Ir a la configuración de contraseña</div>
+                        <p>Inicie sesión con su usuario y contraseña normal y navegue a la URL de configuración de seguridad: <a href="https://kaizenophtha.com/settings/reset-password" target="_blank" style="color: #a855f7;">https://kaizenophtha.com/settings/reset-password</a>.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <span class="step-num">2</span>
+                    <div class="step-content">
+                        <div class="step-title">Escanear el código QR</div>
+                        <p>Abra una aplicación de autenticación en su celular (como <strong>Google Authenticator</strong> o <strong>Authy</strong>) y seleccione "Escanear código QR". Escanee el QR mostrado en la pantalla de Kaizen. <em>(Si la cámara no funciona, puede ingresar manualmente el código secreto de texto provisto)</em>.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <span class="step-num">3</span>
+                    <div class="step-content">
+                        <div class="step-title">Verificar y guardar</div>
+                        <p>Ingrese el código temporal de 6 dígitos que genera la aplicación móvil de su celular en el campo "Verificar token" de la pantalla de Kaizen y presione "Activar". Si el código coincide, el estado del consentimiento 2FA pasará automáticamente a activo.</p>
+                    </div>
+                </div>
+
+                <div class="callout callout-warning">
+                    <div class="callout-title">⚠️ IMPORTANTE</div>
+                    <p>Una vez activado el 2FA, cada vez que intente iniciar sesión en <a href="https://kaizenophtha.com/sign-in" target="_blank" style="color: #f59e0b;">https://kaizenophtha.com/sign-in</a>, el sistema validará sus credenciales tradicionales y luego le mostrará una interfaz secundaria obligatoria solicitándole el código de 6 dígitos activo en su celular para poder acceder.</p>
+                </div>
+
+                <div class="use-case-box">
+                    <div class="use-case-title">🔒 CASO DE USO: PÉRDIDA DE DISPOSITIVO MÓVIL</div>
+                    <p><strong>Problema:</strong> Un visitador pierde su teléfono celular y no puede obtener el token de 6 dígitos para iniciar sesión en la web.
+                    <br><strong>Solución para el Administrador:</strong>
+                    El administrador debe ir al panel de <strong>Usuarios</strong>, ubicar la ficha del visitador afectado, y hacer clic en el botón de seguridad <strong>"Desactivar 2FA"</strong>. Esto restablece la autenticación del usuario al modo clásico temporalmente para que pueda ingresar solo con clave y volver a configurar su nuevo dispositivo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- REGISTRO DE MEDICOS -->
+        <section id="medicos">
+            <h2>👥 Registro Individual de Médicos y Droguerías</h2>
+            <div class="card">
+                <div class="role-indicator">
+                    <span class="badge badge-admin">Administrador</span>
+                </div>
+                <p>Los médicos, droguerías o paneles comerciales constituyen el núcleo del sistema, referenciados internamente como **Terceros (Thirds)**. Pueden administrarse desde la ruta: <a href="https://kaizenophtha.com/records/thirds" target="_blank" style="color: #a855f7;">https://kaizenophtha.com/records/thirds</a>.</p>
+
+                <h3>Pestañas de la Ficha del Cliente (Tercero)</h3>
+                <ul>
+                    <li><strong>Información Personal:</strong> Tipo de panel (médico, droguería), identificación, nombres, apellidos, género y fecha de nacimiento.</li>
+                    <li><strong>Información de Contacto:</strong> Correo electrónico, teléfono, celular, dirección física y ciudad.</li>
+                    <li><strong>Coordenadas GPS Manuales:</strong> En esta pestaña se visualizan la <em>Latitud</em> y <em>Longitud</em> geográficas de la dirección. Si editas a un médico y sus coordenadas son nulas, puedes presionar el botón **"Obtener mi ubicación GPS actual"** para que el navegador autocomplete las coordenadas geográficas de donde estás parado en ese momento de forma manual.</li>
+                    <li><strong>Información adicional (Habeas Data):</strong> Clasificación (A, B, C), Especialidad médica, Subespecialidad y Región (Boyacá, Antioquia, Bogotá, etc.). También incluye el consentimiento de <strong>Habeas Data</strong>.</li>
+                </ul>
+
+                <h3>Módulo de Consentimiento de Habeas Data</h3>
+                <p>Kaizen 3.0 integra dos formas para asegurar el cumplimiento legal del Habeas Data (obligatorio para la visita médica):</p>
+                <ol>
+                    <li><strong>Firmar en Pantalla (Modal de Firma Digital):</strong> Al hacer clic en esta opción, se despliega una pizarra táctil interactiva. El médico o cliente puede realizar su firma manuscrita con su dedo en la pantalla del celular/tablet, o con el ratón en la PC. El sistema procesa la firma en formato digital de imagen y la asocia al registro.</li>
+                    <li><strong>Subir Documento Firmado:</strong> Permite cargar directamente un documento PDF o imagen del consentimiento físico escaneado. Los documentos se almacenan de forma segura en la nube de <strong>Amazon S3</strong>.</li>
+                </ol>
+
+                <div class="use-case-box">
+                    <div class="use-case-title">📝 CASO DE USO: REGISTRO FÍSICO EN LA CONSULTA</div>
+                    <p><strong>Ejemplo práctico:</strong> Un visitador se encuentra en el consultorio del Dr. Felipe. El doctor acepta el acuerdo de Habeas Data pero no desea firmar de forma manuscrita en la pantalla digital.
+                    <br><strong>Solución:</strong> El visitador le toma una foto al formulario de consentimiento físico firmado por el doctor. Más tarde, el administrador carga dicha foto en la ficha del tercero bajo la sección <strong>"Subir Documento"</strong> en la pestaña <em>Información Adicional</em>. El archivo se sube automáticamente al S3 de Amazon y la cuenta queda validada como <code>Otorgado ✓</code>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- IMPORTACION MASIVA EXCEL -->
+        <section id="excel">
+            <h2>📥 Importación Masiva desde Microsoft Excel</h2>
+            <div class="card">
+                <div class="role-indicator">
+                    <span class="badge badge-admin">Administrador</span>
+                </div>
+                <p>Para cargar paneles comerciales de forma masiva, los administradores pueden descargar la plantilla Excel pre-configurada e importar miles de registros a la vez en la URL: <a href="https://kaizenophtha.com/records/thirds" target="_blank" style="color: #a855f7;">https://kaizenophtha.com/records/thirds</a>.</p>
+
+                <div class="screenshot-container">
+                    <img src="imagenes/paneles_tabla.png" alt="Tabla de Paneles">
+                    <div class="screenshot-caption">Pantalla de administración de terceros desde donde se accede a la descarga de la plantilla Excel e Importación Masiva.</div>
+                </div>
+
+                <h3>Reglas de Normalización del Importador Inteligente</h3>
+                <ul>
+                    <li><strong>Títulos de Columnas:</strong> El sistema limpia tildes, mayúsculas y espacios. Columnas como <code>Nombre</code>, <code>Dirección</code>, <code>Cédula</code> o <code>Tipo Panel</code> se interpretan correctamente sin importar el formato.</li>
+                    <li><strong>Fechas de Cumpleaños:</strong> Soporta formatos sencillos del tipo <code>DD-MM</code> (Ej: 14-06) y los parsea a un tipo de fecha válido interna y automáticamente.</li>
+                    <li><strong>Geografía y Región:</strong> Valida que el nombre de la ciudad y la región coincidan con el catálogo interno de base de datos de Kaizen, enlazándolos de forma automática.</li>
+                </ul>
+
+                <div class="callout callout-warning">
+                    <div class="callout-title">⚠️ DIÁLOGO DE AUDITORÍA DE IMPORTACIÓN</div>
+                    <p>Tras finalizar el procesamiento del archivo Excel, Kaizen le mostrará un modal detallando el número exacto de filas importadas con éxito. En caso de fallar alguna fila (por ejemplo, correo electrónico inválido o región inexistente), el log le indicará exactamente la fila y el motivo del error, permitiendo corregir el archivo y volverlo a subir sin duplicar datos.</p>
+                </div>
+
+                <div class="use-case-box">
+                    <div class="use-case-title">📈 CASO DE USO: CORRECCIÓN DE REGISTROS DE IMPORTACIÓN</div>
+                    <p><strong>Escenario:</strong> Un administrador sube un listado de 50 droguerías nuevas. El sistema reporta: <code>Fila 12: Región 'Norte' no coincide con las registradas.</code>
+                    <br><strong>Procedimiento de Corrección:</strong>
+                    El administrador no tiene que preocuparse por duplicados. Las otras 49 droguerías ya fueron guardadas con éxito. El administrador solo debe abrir su Excel local, corregir la fila 12 cambiando 'Norte' por la región válida (por ejemplo, 'Costa'), guardar el Excel y volverlo a subir. El sistema ignorará los duplicados por cédula/NIT y procesará con éxito la droguería restante.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- GESTION PORTAFOLIOS -->
+        <section id="portafolios">
+            <h2>📂 Gestión de Portafolios (Asignación Asesor/Cliente)</h2>
+            <div class="card">
+                <div class="role-indicator">
+                    <span class="badge badge-admin">Administrador</span>
+                </div>
+                <p>El portafolio determina la relación comercial entre los asesores (representantes) y los médicos. Ningún representante comercial puede visitar o planificar tareas con un médico que no esté formalmente aprobado y asignado en su portafolio.</p>
+                
+                <p>Los administradores pueden gestionar el portafolio de cada asesor en la URL: <a href="https://kaizenophtha.com/records/users" target="_blank" style="color: #a855f7;">https://kaizenophtha.com/records/users</a>, seleccionando un usuario y abriendo la pestaña <strong>"Portafolio"</strong>.</p>
+
+                <h3>Acciones del Administrador de Portafolio</h3>
+                <div class="step-item">
+                    <span class="step-num">1</span>
+                    <div class="step-content">
+                        <div class="step-title">Aprobar o Desaprobar (👎 / 👍)</div>
+                        <p>Cuando un representante comercial solicita asociar un médico a su portafolio, el estado inicial de la relación queda en "pendiente" (no aparece en sus listados activos). El administrador puede dar clic en el botón de aprobación para activarlo, o en el de pulgar abajo (👎) para denegar o retirar la aprobación de inmediato.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <span class="step-num">2</span>
+                    <div class="step-content">
+                        <div class="step-title">Desasignar por Completo (🗑️)</div>
+                        <p>El botón de papelera elimina la relación física en base de datos entre el asesor y el médico, liberando al cliente o desvinculándolo de esa cuenta comercial.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <span class="step-num">3</span>
+                    <div class="step-content">
+                        <div class="step-title">Acciones Masivas de Lote</div>
+                        <p>Mediante los checkboxes de selección a la izquierda del listado de médicos de cada portafolio, se pueden seleccionar de forma simultánea múltiples registros para aprobarlos o desasignarlos en lote con un solo clic.</p>
+                    </div>
+                </div>
+
+                <div class="use-case-box">
+                    <div class="use-case-title">💼 CASO DE USO: RELEVO COMERCIAL DE ZONA</div>
+                    <p><strong>Escenario:</strong> El representante Andrés es trasladado a otra línea, y el visitador Carlos tomará a su cargo sus 15 médicos de Medellín.
+                    <br><strong>Procedimiento:</strong>
+                    1. El administrador ingresa al perfil de Andrés, selecciona a los 15 médicos mediante los checkboxes de su portafolio, y da clic en <strong>"Desasignar seleccionados"</strong>.
+                    2. Luego, entra al perfil de Carlos, busca en la barra "Asignar panel" a cada uno de estos médicos Medellín por nombre o cédula, y presiona **"Asignar"**. Finalmente, aprueba la relación y listo: los médicos aparecen de inmediato en el celular de Carlos.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISITAS Y GPS -->
+        <section id="visitas">
+            <h2>📍 Registro de Visitas y Georeferenciación</h2>
+            <div class="card">
+                <div class="role-indicator">
+                    <span class="badge badge-rep">Representante</span>
+                </div>
+                <p>Los visitadores reportan sus gestiones presenciales a través de la pestaña **Visitas**: <a href="https://kaizenophtha.com/apps/visits" target="_blank" style="color: #a855f7;">https://kaizenophtha.com/apps/visits</a>.</p>
+
+                <h3>Verificación Geográfica de la Visita (Seguridad GPS)</h3>
+                <p>Kaizen 3.0 cuenta con un motor inteligente de auditoría geográfica en tiempo real que protege la veracidad del trabajo de campo:</p>
+                
+                <div class="step-item">
+                    <span class="step-num">A</span>
+                    <div class="step-content">
+                        <div class="step-title">Captura automática de coordenadas del asesor</div>
+                        <p>Al momento de crear el reporte de la visita presencial, el aplicativo móvil consulta las coordenadas GPS del celular del visitador.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <span class="step-num">B</span>
+                    <div class="step-content">
+                        <div class="step-title">Cálculo de la Distancia y Auto-Verificación</div>
+                        <p>El backend calcula la distancia métrica en línea recta entre las coordenadas del celular del visitador y las del médico registrado en base de datos. Si la distancia es menor o igual a **100 metros**, la visita se marca con la insignia verde de **Verificada (`isVerified = true`)**.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <span class="step-num">C</span>
+                    <div class="step-content">
+                        <div class="step-title">Auto-aprendizaje en Primera Visita</div>
+                        <p>Si el médico es nuevo y no tiene coordenadas registradas en el sistema, el sistema adopta las coordenadas de la primera visita del asesor como la ubicación geográfica oficial de ese consultorio/médico automáticamente, agilizando el mantenimiento del catálogo de ubicaciones.</p>
+                    </div>
+                </div>
+
+                <div class="use-case-box">
+                    <div class="use-case-title">🗺️ CASO DE USO: VERIFICACIÓN FRENTE A DIRECCIÓN DESACTUALIZADA</div>
+                    <p><strong>Ejemplo práctico:</strong> Un visitador llega a la consulta de la Dra. María, pero ella se mudó de consultorio a la oficina de al lado en el mismo centro comercial.
+                    <br><strong>Resultado:</strong> Como la nueva oficina está a menos de 20 metros de la anterior, el sistema calcula la diferencia y el reporte se marca como <code>Verificada</code>. Si la doctora se hubiera mudado a otro edificio a más de 100 metros, la visita se registraría como "No Verificada", y el administrador tendría que actualizar las coordenadas en la ficha de la Dra. María usando el botón "Obtener mi ubicación GPS actual" desde la nueva dirección física.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- JUSTIFICACIONES -->
+        <section id="justificaciones">
+            <h2>📄 Justificaciones de Fin de Mes</h2>
+            <div class="card">
+                <div class="role-indicator">
+                    <span class="badge badge-admin">Administrador</span>
+                    <span class="badge badge-rep">Representante</span>
+                </div>
+                <p>Al final de cada periodo mensual, los asesores comerciales deben cumplir con un número mínimo de visitas por cada cliente de acuerdo a su clasificación (impacto requerido). Si por algún motivo no se alcanzan a completar las visitas reglamentarias a un médico, el sistema exige una **Justificación**.</p>
+                
+                <p>Pueden auditarse e ingresarse desde la URL: <a href="https://kaizenophtha.com/apps/justifications" target="_blank" style="color: #a855f7;">https://kaizenophtha.com/apps/justifications</a>.</p>
+
+                <div class="screenshot-container">
+                    <img src="imagenes/justificaciones.png" alt="Pantalla de Justificaciones">
+                    <div class="screenshot-caption">Módulo de auditoría y creación de justificaciones comerciales de Kaizen 3.0.</div>
+                </div>
+
+                <h3>Cómo Funciona el Proceso de Justificación</h3>
+                <ol>
+                    <li>Al culminar el mes calendario, Kaizen genera automáticamente un listado de "médicos sin impactos completos" para cada asesor.</li>
+                    <li>El asesor comercial debe ingresar al módulo, seleccionar al médico en deuda y registrar el motivo (ej. Vacaciones, incapacidad médica, congreso internacional).</li>
+                    <li>La solicitud queda en estado **Pendiente** en la bandeja del Administrador.</li>
+                    <li>El <span class="badge badge-admin">Administrador</span> evalúa la justificación y puede aprobarla (lo que compensa el cumplimiento mensual del asesor) o rechazarla.</li>
+                </ol>
+
+                <div class="callout callout-warning">
+                    <div class="callout-title">💡 EXCEPCIÓN DE ADMINISTRADOR</div>
+                    <p>Por regla general, el sistema impide registrar justificaciones de médicos que no pertenecen al portafolio del usuario conectado. No obstante, para agilizar auditorías, los usuarios con rol de <strong>Administrador</strong> tienen un bypass que les permite crear, editar y aprobar directamente justificaciones de cualquier médico del país, sin importar a qué asesor esté asignado.</p>
+                </div>
+
+                <div class="use-case-box">
+                    <div class="use-case-title">🏢 CASO DE USO: MÉDICO FUERA DEL PAÍS</div>
+                    <p><strong>Ejemplo práctico:</strong> El Dr. Restrepo estuvo en un simposio en España durante 3 semanas en junio de 2026. El visitador no pudo realizar las 2 visitas programadas para ese mes.
+                    <br><strong>Procedimiento:</strong>
+                    Al final de junio, el visitador entra a <strong>Justificaciones</strong>, selecciona al Dr. Restrepo, redacta "Asistencia a Simposio Médico en España" y lo envía. La administradora revisa la justificación, da clic en el check de <strong>"Aprobado"</strong> y el porcentaje de cumplimiento del visitador para ese mes no se ve penalizado por ese médico.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- AGENDA Y CALENDARIO -->
+        <section id="agenda">
+            <h2>📅 Agenda y Calendario Unificado</h2>
+            <div class="card">
+                <div class="role-indicator">
+                    <span class="badge badge-admin">Administrador</span>
+                    <span class="badge badge-rep">Representante</span>
+                </div>
+                <p>El calendario centraliza de forma interactiva toda la información de campo en un único visor integrado mensual o semanal: <a href="https://kaizenophtha.com/apps/calendar" target="_blank" style="color: #a855f7;">https://kaizenophtha.com/apps/calendar</a>.</p>
+
+                <h3>Visores del Calendario por Código de Colores</h3>
+                <ul>
+                    <li><strong style="color: #10b981;">● Verde (Visitas):</strong> Muestra las visitas médicas que el visitador tiene programadas o realizadas. Permite planificar el itinerario del día.</li>
+                    <li><strong style="color: #f59e0b;">● Amarillo (Plan de Trabajo):</strong> Muestra los planes de trabajo semanales de los asesores. Representan las actividades o metas macro asignadas para el periodo actual y se visualizan como bloques que abarcan múltiples días de la semana.</li>
+                    <li><strong style="color: #6366f1;">● Azul (Cumpleaños):</strong> Muestra automáticamente el día de cumpleaños de los médicos asignados al portafolio activo, permitiendo planificar con antelación visitas de felicitación o entrega de atenciones comerciales.</li>
+                </ul>
+
+                <h3>Filtros rápidos e interacción</h3>
+                <p>En la barra lateral izquierda del calendario, puede marcar o desmarcar los checkboxes de etiquetas para aislar un tipo específico de evento. Por ejemplo, desactivar cumpleaños y visitas para auditar únicamente la cobertura del plan semanal de trabajo.</p>
+
+                <div class="use-case-box">
+                    <div class="use-case-title">📅 CASO DE USO: PLANEACIÓN DE RUTA DE CUMPLEAÑOS</div>
+                    <p><strong>Escenario:</strong> Un visitador desea optimizar su ruta de la semana para entregar obsequios de cumpleaños.
+                    <br><strong>Procedimiento:</strong>
+                    El visitador filtra el calendario marcando únicamente el check de color azul <strong>"Cumpleaños"</strong> y desmarcando visitas y planes. De un vistazo, detecta que el Dr. Jaime cumple el martes 9 de junio y la Dra. Clara el jueves 11 de junio. Acto seguido, abre la vista por <em>Día</em> y programa las visitas verdes de entrega en esos días y horas específicas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONSTRUCTOR DE REPORTES -->
+        <section id="reportes">
+            <h2>📊 Constructor de Reportes e Indicadores</h2>
+            <div class="card">
+                <div class="role-indicator">
+                    <span class="badge badge-admin">Administrador</span>
+                </div>
+                <p>El módulo de informes permite realizar un análisis detallado del desempeño e impactos comerciales en el país: <a href="https://kaizenophtha.com/dashboards/reports" target="_blank" style="color: #a855f7;">https://kaizenophtha.com/dashboards/reports</a>.</p>
+
+                <div class="screenshot-container">
+                    <img src="imagenes/reportes_pantalla.png" alt="Pantalla de Reportes">
+                    <div class="screenshot-caption">Constructor dinámico de reportes Excel y mapa de geomarketing de Kaizen 3.0.</div>
+                </div>
+
+                <h3>Constructor a Mano Alzada</h3>
+                <p>Permite seleccionar las columnas exactas que desea exportar del reporte (por ejemplo: fecha de visita, observaciones, asesor, especialidad del médico, etc.). Además, permite filtrar la información en cascada por <strong>Asesor</strong>, <strong>Región</strong> o <strong>Rango de Fechas</strong>, generando un informe Microsoft Excel personalizado al instante.</p>
+
+                <h3>Geomarketing y Cobertura Comercial (Mapa)</h3>
+                <div class="screenshot-container">
+                    <img src="imagenes/geomarketing_mapa.png" alt="Mapa de Cobertura de Médicos">
+                    <div class="screenshot-caption">Ubicación de paneles médicos distribuidos a lo largo del mapa nacional de Colombia.</div>
+                </div>
+                <p>Muestra de manera gráfica la ubicación exacta en el mapa de los médicos activos que entran en los filtros del reporte seleccionado. Al dar clic sobre cualquier marcador de ubicación, se despliega una ficha con información clave: nombre del médico, dirección física y ciudad actual, así como el número de impactos requeridos mensuales.</p>
+
+                <div class="use-case-box">
+                    <div class="use-case-title">📊 CASO DE USO: AUDITORÍA DE IMPACTOS EN LA COSTA</div>
+                    <p><strong>Objetivo:</strong> La directora comercial quiere un reporte detallado del desempeño de la zona Norte/Costa del último trimestre.
+                    <br><strong>Procedimiento:</strong>
+                    1. En la pantalla de reportes, selecciona las columnas: <code>Fecha del Visita</code>, <code>Comentarios / Reporte</code>, <code>Nombre Asesor</code>, <code>Nombre del Médico</code> y <code>Especialidad</code>.
+                    2. En el filtro de región selecciona **"Costa"**.
+                    3. Establece el rango de fechas para los últimos 90 días.
+                    4. Presiona **"Generar y Descargar Excel"**. Obtendrá un informe limpio solo con los registros solicitados, listo para su análisis en Excel.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- AUDITORIA DE SESIONES -->
+        <section id="auditoria">
+            <h2>🛡️ Auditoría de Sesiones y Control de Accesos</h2>
+            <div class="card">
+                <div class="role-indicator">
+                    <span class="badge badge-admin">Administrador</span>
+                </div>
+                <p>Por razones de seguridad e integridad del negocio, Kaizen 3.0 registra de forma inalterable el historial de ingresos a la plataforma. Los administradores pueden auditar estas bitácoras en la URL: <a href="https://kaizenophtha.com/records/users/session-logs" target="_blank" style="color: #a855f7;">https://kaizenophtha.com/records/users/session-logs</a>.</p>
+
+                <h3>Datos Registrados por Sesión:</h3>
+                <ul>
+                    <li><strong>Usuario:</strong> Nombres, apellidos y correo electrónico institucional del usuario que accedió.</li>
+                    <li><strong>Dirección IP:</strong> Dirección de Internet pública del dispositivo desde donde se inició sesión (vital para detectar accesos inusuales o no autorizados).</li>
+                    <li><strong>Dispositivo de Acceso:</strong> Sistema operativo y navegador web utilizado (Ej: Chrome en Windows, Safari en iOS, Android Mobile).</li>
+                    <li><strong>Horarios de Actividad:</strong> Fecha y hora exacta de inicio de sesión (`loginTime`) y de cierre (`logoutTime`). Si la sesión se encuentra activa actualmente, se muestra una insignia verde indicadora.</li>
+                    <li><strong>Duración:</strong> Tiempo acumulado de uso de la plataforma por cada ingreso de sesión.</li>
+                </ul>
+
+                <p>El administrador puede realizar búsquedas avanzadas y exportar este historial de accesos directamente a Excel mediante el botón de descarga del módulo.</p>
+
+                <div class="use-case-box">
+                    <div class="use-case-title">🛡️ CASO DE USO: DATEDCIÓN DE ACCESOS SOSPECHOSOS</div>
+                    <p><strong>Alerta:</strong> La administración sospecha que un visitador está compartiendo sus credenciales de acceso con terceros externos.
+                    <br><strong>Procedimiento de Auditoría:</strong>
+                    La supervisora entra a <strong>Auditoría de Sesiones</strong>, escribe el correo del visitador en la barra de búsqueda y filtra por el mes actual. Revisa la columna de <code>Dirección IP</code> y el <code>Dispositivo</code>. Si detecta inicios de sesión simultáneos con diferentes IPs públicas en un corto intervalo de tiempo (ej. una IP de Bogotá y otra de Cali con 10 minutos de diferencia), se confirma la intrusión o el uso compartido de cuenta, permitiendo tomar medidas de seguridad inmediatas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ARQUITECTURA -->
+        <section id="arquitectura">
+            <h2>🛠️ Arquitectura y Desarrollo Técnico</h2>
+            <div class="card">
+                <div class="role-indicator">
+                    <span class="badge badge-tech">Desarrollador / Sistemas</span>
+                </div>
+                <p>Esta sección detalla los componentes tecnológicos, lenguajes de programación, dependencias clave y configuraciones del servidor que hacen funcionar a Kaizen 3.0 en producción.</p>
+
+                <h3>Ficha Técnica del Stack Tecnológico</h3>
+                <table class="tech-table">
+                    <thead>
+                        <tr>
+                            <th>Componente</th>
+                            <th>Tecnología / Framework</th>
+                            <th>Versión / Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Frontend Core</strong></td>
+                            <td>React.js (Single Page Application)</td>
+                            <td>v18+ con TypeScript</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Maquetación y UI</strong></td>
+                            <td>Material UI (MUI) / Fuse React Admin</td>
+                            <td>v5.0+ (Styled Components)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gestor de Estado</strong></td>
+                            <td>Redux Toolkit (RTK)</td>
+                            <td>Asincronismo vía AsyncThunk</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Formularios</strong></td>
+                            <td>React Hook Form + Yup</td>
+                            <td>Validaciones en tiempo real</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mapas y Cobertura</strong></td>
+                            <td>Leaflet.js / React-Leaflet</td>
+                            <td>Mapas interactivos vectoriales</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Backend Runtime</strong></td>
+                            <td>Node.js</td>
+                            <td>v16.20.2 (Servidor Producción)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Framework Backend</strong></td>
+                            <td>Express.js (compilado con TypeScript)</td>
+                            <td>Arquitectura de Middlewares y DTOs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ORM (Base de Datos)</strong></td>
+                            <td>Sequelize ORM</td>
+                            <td>Modelos mapeados automáticamente</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Base de Datos</strong></td>
+                            <td>PostgreSQL (Expositor Docker local)</td>
+                            <td>Puerto host: 5434 / Socket local</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Almacenamiento Cloud</strong></td>
+                            <td>Amazon S3 (Simple Storage Service)</td>
+                            <td>Carga de PDFs y firmas digitales</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gestor de Procesos</strong></td>
+                            <td>PM2 (Process Manager 2)</td>
+                            <td>Proceso: <code>backend-app</code> en puerto 4001</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Servidor Web (Host)</strong></td>
+                            <td>Apache HTTP Server</td>
+                            <td>Procesamiento SSL y proxy reverso</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Detalles de la Arquitectura en Producción</h3>
+                
+                <h3>1. Lógica del Servidor Web (Proxy Reverso Apache y Frontend)</h3>
+                <p>El frontend se encuentra compilado en código estático optimizado (HTML/JS/CSS) en la ruta del servidor <code>/home/kaizenophtha/public_html/</code>. Las peticiones del navegador para recargar rutas dinámicas (React Router) se interceptan mediante el archivo <code>.htaccess</code> en la raíz:</p>
+                <pre><code>&lt;IfModule mod_rewrite.c&gt;
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+&lt;/IfModule&gt;</code></pre>
+                <p>Las llamadas a la API se canalizan a través de un subdominio específico de backend configurado como Proxy Reverso hacia el puerto interno <code>4001</code> administrado por **PM2**.</p>
+
+                <h3>2. Estructura de Base de Datos y Dockerización</h3>
+                <p>El motor de base de datos es <strong>PostgreSQL</strong>, el cual corre encapsulado en un contenedor Docker con el nombre <code>postgres_ophtha</code>. Para evitar colisiones y bloqueos del cortafuegos local (CentOS Firewall) en el puerto TCP <code>5432</code>, la comunicación con el backend de Node.js se realiza de manera segura mediante **Sockets UNIX locales** apuntando al directorio mapeado <code>/var/run/postgresql</code>, garantizando una conexión directa, ultrarrápida y blindada a nivel de red.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Simple client-side search engine and navigation highlight
+        function filterDocumentation() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const sections = document.querySelectorAll('section');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            sections.forEach(section => {
+                const text = section.innerText.toLowerCase();
+                const targetId = section.getAttribute('id');
+                const navItem = document.getElementById('nav-' + targetId);
+                
+                if (text.includes(query)) {
+                    section.style.display = 'block';
+                    if (navItem) navItem.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                    if (navItem) navItem.style.display = 'none';
+                }
+            });
+        }
+
+        // Active class toggle on scroll
+        const sections = document.querySelectorAll('section');
+        const navLi = document.querySelectorAll('.nav-item');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= (sectionTop - 120)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLi.forEach(li => {
+                li.classList.remove('active');
+                if (li.getAttribute('id') === 'nav-' + current) {
+                    li.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

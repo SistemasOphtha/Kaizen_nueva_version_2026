@@ -53,6 +53,11 @@ function Reset() {
 	const [error2FA, setError2FA] = useState<string | null>(null);
 	const [success2FA, setSuccess2FA] = useState<string | null>(null);
 
+	// Email 2FA states
+	const [methodType, setMethodType] = useState<'totp' | 'email'>('totp');
+	const [emailSetupMode, setEmailSetupMode] = useState(false);
+	const [emailToken, setEmailToken] = useState('');
+
 	const handleSetup2FA = async () => {
 		setLoading2FA(true);
 		setError2FA(null);
@@ -91,11 +96,57 @@ function Reset() {
 				...user,
 				data: {
 					...user.data,
-					twoFactorEnabled: true
+					twoFactorEnabled: true,
+					twoFactorMethod: 'totp'
 				}
 			}));
 		} catch (err: any) {
 			setError2FA(err.response?.data?.message || 'Código de verificación inválido. Intente nuevamente.');
+		} finally {
+			setLoading2FA(false);
+		}
+	};
+
+	const handleSetupEmail2FA = async () => {
+		setLoading2FA(true);
+		setError2FA(null);
+		setSuccess2FA(null);
+		try {
+			const response = await axios.post('/api/auth/2fa/email/setup');
+			setSuccess2FA(response.data.message || 'Código enviado al correo.');
+			setEmailSetupMode(true);
+		} catch (err: any) {
+			setError2FA(err.response?.data?.message || 'Error al iniciar la configuración de 2FA por correo.');
+		} finally {
+			setLoading2FA(false);
+		}
+	};
+
+	const handleVerifyEmail2FA = async () => {
+		if (!emailToken || emailToken.length !== 6) {
+			setError2FA('El código debe ser de 6 dígitos.');
+			return;
+		}
+		setLoading2FA(true);
+		setError2FA(null);
+		try {
+			await axios.post('/api/auth/2fa/email/verify', {
+				token: emailToken
+			});
+			setSuccess2FA('¡Doble factor de autenticación por correo activado con éxito!');
+			setEmailSetupMode(false);
+			setEmailToken('');
+			
+			dispatch(setUser({
+				...user,
+				data: {
+					...user.data,
+					twoFactorEnabled: true,
+					twoFactorMethod: 'email'
+				}
+			}));
+		} catch (err: any) {
+			setError2FA(err.response?.data?.message || 'Código de verificación incorrecto. Intente nuevamente.');
 		} finally {
 			setLoading2FA(false);
 		}
@@ -116,7 +167,8 @@ function Reset() {
 				...user,
 				data: {
 					...user.data,
-					twoFactorEnabled: false
+					twoFactorEnabled: false,
+					twoFactorMethod: 'totp'
 				}
 			}));
 		} catch (err: any) {
@@ -128,9 +180,11 @@ function Reset() {
 
 	const handleCancelSetup = () => {
 		setSetupMode(false);
+		setEmailSetupMode(false);
 		setQrCode(null);
 		setSecret2FA(null);
 		setToken2FA('');
+		setEmailToken('');
 		setError2FA(null);
 	};
 
@@ -240,6 +294,8 @@ function Reset() {
 							<div>
 								<Alert severity="success" className="mb-16">
 									El Doble Factor de Autenticación (2FA) se encuentra <strong>ACTIVADO</strong> en su cuenta.
+									<br />
+									Método activo: <strong>{user?.data?.twoFactorMethod === 'email' ? 'Correo Electrónico' : 'Aplicación de Autenticación'}</strong>
 								</Alert>
 								<Button
 									variant="outlined"
@@ -251,66 +307,141 @@ function Reset() {
 									{loading2FA ? 'Desactivando...' : 'Desactivar 2FA'}
 								</Button>
 							</div>
-						) : setupMode ? (
-							<div className="flex flex-col items-center">
-								<Typography className="text-14 text-text-secondary mb-16 text-center">
-									Escanee este código QR con Google Authenticator u otra app de 2FA e ingrese el código de 6 dígitos generado.
-								</Typography>
-								{qrCode && (
-									<img
-										src={qrCode}
-										alt="Código QR 2FA"
-										className="w-200 h-200 mb-16 border-1 border-gray-300 rounded-8"
-									/>
-								)}
-								<Typography className="text-12 font-bold mb-16 select-all">
-									Clave secreta: {secret2FA}
-								</Typography>
-								<TextField
-									label="Código de 6 dígitos"
-									type="text"
-									value={token2FA}
-									onChange={(e) => setToken2FA(e.target.value.replace(/\D/g, '').slice(0, 6))}
-									variant="outlined"
-									required
-									fullWidth
-									className="mb-16"
-									inputProps={{ maxLength: 6, style: { textAlign: 'center', fontSize: '20px', letterSpacing: '8px' } }}
-								/>
-								<div className="flex w-full gap-12">
-									<Button
-										variant="outlined"
-										onClick={handleCancelSetup}
-										className="flex-1"
-										disabled={loading2FA}
-									>
-										Cancelar
-									</Button>
-									<Button
-										variant="contained"
-										color="secondary"
-										onClick={handleVerify2FA}
-										className="flex-1"
-										disabled={loading2FA || token2FA.length !== 6}
-									>
-										{loading2FA ? 'Verificando...' : 'Activar 2FA'}
-									</Button>
-								</div>
-							</div>
 						) : (
 							<div>
-								<Typography className="text-14 text-text-secondary mb-16">
-									Proteja su cuenta exigiendo un código adicional de 6 dígitos en cada inicio de sesión.
-								</Typography>
-								<Button
-									variant="contained"
-									color="secondary"
-									onClick={handleSetup2FA}
-									disabled={loading2FA}
-									fullWidth
-								>
-									{loading2FA ? 'Generando...' : 'Configurar 2FA'}
-								</Button>
+								{/* Selector de tipo de 2FA */}
+								<div className="flex border-b-1 border-slate-200 mb-24">
+									<Button
+										className={`flex-1 rounded-none py-12 ${methodType === 'totp' ? 'border-b-2 border-secondary font-bold text-secondary' : 'text-text-secondary'}`}
+										onClick={() => { setMethodType('totp'); handleCancelSetup(); }}
+									>
+										Aplicación 2FA
+									</Button>
+									<Button
+										className={`flex-1 rounded-none py-12 ${methodType === 'email' ? 'border-b-2 border-secondary font-bold text-secondary' : 'text-text-secondary'}`}
+										onClick={() => { setMethodType('email'); handleCancelSetup(); }}
+									>
+										Correo Electrónico
+									</Button>
+								</div>
+
+								{methodType === 'totp' ? (
+									setupMode ? (
+										<div className="flex flex-col items-center">
+											<Typography className="text-14 text-text-secondary mb-16 text-center">
+												Escanee este código QR con Google Authenticator u otra app de 2FA e ingrese el código de 6 dígitos generado.
+											</Typography>
+											{qrCode && (
+												<img
+													src={qrCode}
+													alt="Código QR 2FA"
+													className="w-200 h-200 mb-16 border-1 border-gray-300 rounded-8"
+												/>
+											)}
+											<Typography className="text-12 font-bold mb-16 select-all">
+												Clave secreta: {secret2FA}
+											</Typography>
+											<TextField
+												label="Código de 6 dígitos"
+												type="text"
+												value={token2FA}
+												onChange={(e) => setToken2FA(e.target.value.replace(/\D/g, '').slice(0, 6))}
+												variant="outlined"
+												required
+												fullWidth
+												className="mb-16"
+												inputProps={{ maxLength: 6, style: { textAlign: 'center', fontSize: '20px', letterSpacing: '8px' } }}
+											/>
+											<div className="flex w-full gap-12">
+												<Button
+													variant="outlined"
+													onClick={handleCancelSetup}
+													className="flex-1"
+													disabled={loading2FA}
+												>
+													Cancelar
+												</Button>
+												<Button
+													variant="contained"
+													color="secondary"
+													onClick={handleVerify2FA}
+													className="flex-1"
+													disabled={loading2FA || token2FA.length !== 6}
+												>
+													{loading2FA ? 'Verificando...' : 'Activar 2FA'}
+												</Button>
+											</div>
+										</div>
+									) : (
+										<div>
+											<Typography className="text-14 text-text-secondary mb-16">
+												Proteja su cuenta exigiendo un código adicional de 6 dígitos de su aplicación de autenticación en cada inicio de sesión.
+											</Typography>
+											<Button
+												variant="contained"
+												color="secondary"
+												onClick={handleSetup2FA}
+												disabled={loading2FA}
+												fullWidth
+											>
+												{loading2FA ? 'Generando...' : 'Configurar por Aplicación'}
+											</Button>
+										</div>
+									)
+								) : (
+									emailSetupMode ? (
+										<div className="flex flex-col items-center">
+											<Typography className="text-14 text-text-secondary mb-16 text-center">
+												Se ha enviado un código de confirmación a su correo: <strong>{user?.data?.email}</strong>. Por favor, ingréselo a continuación.
+											</Typography>
+											<TextField
+												label="Código de 6 dígitos"
+												type="text"
+												value={emailToken}
+												onChange={(e) => setEmailToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
+												variant="outlined"
+												required
+												fullWidth
+												className="mb-16"
+												inputProps={{ maxLength: 6, style: { textAlign: 'center', fontSize: '20px', letterSpacing: '8px' } }}
+											/>
+											<div className="flex w-full gap-12">
+												<Button
+													variant="outlined"
+													onClick={handleCancelSetup}
+													className="flex-1"
+													disabled={loading2FA}
+												>
+													Cancelar
+												</Button>
+												<Button
+													variant="contained"
+													color="secondary"
+													onClick={handleVerifyEmail2FA}
+													className="flex-1"
+													disabled={loading2FA || emailToken.length !== 6}
+												>
+													{loading2FA ? 'Verificando...' : 'Confirmar y Activar'}
+												</Button>
+											</div>
+										</div>
+									) : (
+										<div>
+											<Typography className="text-14 text-text-secondary mb-16">
+												Se enviará un código de verificación de 6 dígitos a su correo electrónico registrado **{user?.data?.email}** en cada inicio de sesión.
+											</Typography>
+											<Button
+												variant="contained"
+												color="secondary"
+												onClick={handleSetupEmail2FA}
+												disabled={loading2FA}
+												fullWidth
+											>
+												{loading2FA ? 'Enviando...' : 'Configurar por Correo'}
+											</Button>
+										</div>
+									)
+								)}
 							</div>
 						)}
 					</div>
