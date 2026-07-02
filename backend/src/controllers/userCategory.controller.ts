@@ -25,7 +25,7 @@ export const getUserCategories = async (req: Request, res: Response) => {
 export const getUserCategoryById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const category = await UserCategory.findByPk(id);
+        const category = await UserCategory.findByPk(Number(id));
         
         if (!category) {
             return res.status(404).json({
@@ -82,7 +82,7 @@ export const updateUserCategory = async (req: Request, res: Response) => {
         const { id } = req.params;
         const categoryData = req.body;
         
-        const category = await UserCategory.findByPk(id);
+        const category = await UserCategory.findByPk(Number(id));
         if (!category) {
             return res.status(404).json({
                 success: false,
@@ -110,7 +110,7 @@ export const updateUserCategory = async (req: Request, res: Response) => {
 export const deleteUserCategory = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const category = await UserCategory.findByPk(id);
+        const category = await UserCategory.findByPk(Number(id));
         
         if (!category) {
             return res.status(404).json({
