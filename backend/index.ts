@@ -23,7 +23,7 @@ const startServer = async () => {
 
         
         // Iniciar el servidor HTTP
-        app.listen(PORT, () => {
+        app.listen(PORT, '0.0.0.0', () => {
             console.log(`Servidor iniciado en el puerto ${PORT}`);
             // Iniciar planificador de tareas en segundo plano (Scheduler)
             import('./src/services/scheduler.service').then(({ startScheduler }) => {
