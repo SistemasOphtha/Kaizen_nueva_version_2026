@@ -24,7 +24,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { selectUser } from 'app/store/user/userSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { getThirds, removeThirdsBulk, selectThirds, selectSearchText } from '../store/thirdsSlice';
+import { getThirds, removeThirdsBulk, selectFilteredThirds, selectSearchText } from '../store/thirdsSlice';
 import { assignThirdByAdmin } from '../store/thirdSlice';
 import ThirdsPartieTableHead from './ThirdsTableHead';
 import { ThirdType } from '../types/ThirdType';
@@ -40,7 +40,7 @@ type ProductsTableProps = WithRouterProps & {
 function ProductsTable(props: ProductsTableProps) {
 	const { navigate } = props;
 	const dispatch = useAppDispatch();
-	const thirds = useAppSelector(selectThirds);
+	const thirds = useAppSelector(selectFilteredThirds);
 	const { role, id: userId } = useAppSelector(selectUser);
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	const searchText = useAppSelector(selectSearchText);
@@ -67,34 +67,9 @@ function ProductsTable(props: ProductsTableProps) {
 	}, [dispatch]);
 
 	useEffect(() => {
-		if (searchText.length !== 0) {
-			const searchWords = searchText.toLowerCase().split(/\s+/).filter(Boolean);
-			if (searchWords.length === 0) {
-				setData(thirds);
-			} else {
-				setData(
-					thirds.filter((third) => {
-						const name = (third.name || '').toLowerCase();
-						const additionalName = (third.additionalName || '').toLowerCase();
-						const identification = (third.identification || '').toLowerCase();
-						const email = (third.email || '').toLowerCase();
-						const city = (third.city || '').toLowerCase();
-						const specialty = (third.third_specialty?.name || '').toLowerCase();
-						const classification = (third.third_classification?.name || '').toLowerCase();
-						const type = (third.third_type?.name || '').toLowerCase();
-						const region = (third.region?.name || '').toLowerCase();
-						const representative = third.thirds_portfolios?.map(p => `${p.portfolio?.user?.firstName || ''} ${p.portfolio?.user?.lastName || ''}`).join(' ').toLowerCase() || '';
-						
-						const fullText = `${name} ${additionalName} ${identification} ${email} ${city} ${specialty} ${classification} ${type} ${region} ${representative}`;
-						return searchWords.every((word) => fullText.includes(word));
-					})
-				);
-			}
-			setPage(0);
-		} else {
-			setData(thirds);
-		}
-	}, [thirds, searchText]);
+		setData(thirds);
+		setPage(0);
+	}, [thirds]);
 
 	function handleRequestSort(event: MouseEvent<HTMLSpanElement>, property: string) {
 		const newOrder: {
