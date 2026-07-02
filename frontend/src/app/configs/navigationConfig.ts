@@ -127,19 +127,17 @@ const navigationConfig: FuseNavigationType = [
 				id: 'users-component',
 				title: 'Users',
 				translate: 'USERS',
-				type: 'collapse',
+				type: 'item',
 				icon: 'heroicons-outline:user-group',
-				url: '/records/users',
-				children: [
-					{
-						id: 'user-classification-component',
-						title: 'Classifications',
-						translate: 'CLASSIFICATIONS',
-						type: 'item',
-						icon: 'heroicons-outline:shield-check',
-						url: '/records/users/user-classifications'
-					}
-				]
+				url: '/records/users'
+			},
+			{
+				id: 'user-classification-component',
+				title: 'Classifications',
+				translate: 'CLASSIFICATIONS',
+				type: 'item',
+				icon: 'heroicons-outline:shield-check',
+				url: '/records/users/user-classifications'
 			},
 			{
 				id: 'thirds-component',
