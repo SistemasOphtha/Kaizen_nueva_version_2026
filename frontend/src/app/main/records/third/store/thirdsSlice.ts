@@ -106,6 +106,8 @@ export const selectFilteredThirds = createSelector(
 			const name = (third.name || '').toLowerCase();
 			const additionalName = (third.additionalName || '').toLowerCase();
 			const identification = (third.identification || '').toLowerCase();
+			const phone = (third.phone || '').toLowerCase();
+			const mobile = (third.mobile || '').toLowerCase();
 			const email = (third.email || '').toLowerCase();
 			const city = (third.city || '').toLowerCase();
 			const specialty = (third.third_specialty?.name || '').toLowerCase();
@@ -114,7 +116,7 @@ export const selectFilteredThirds = createSelector(
 			const region = (third.region?.name || '').toLowerCase();
 			const representative = third.thirds_portfolios?.map(p => `${p.portfolio?.user?.firstName || ''} ${p.portfolio?.user?.lastName || ''}`).join(' ').toLowerCase() || '';
 			
-			const fullText = `${name} ${additionalName} ${identification} ${email} ${city} ${specialty} ${classification} ${type} ${region} ${representative}`;
+			const fullText = `${name} ${additionalName} ${identification} ${phone} ${mobile} ${email} ${city} ${specialty} ${classification} ${type} ${region} ${representative}`;
 			return searchWords.every((word) => fullText.includes(word));
 		});
 	}
