@@ -9,8 +9,8 @@ type WidgetsType = {
 	[key: string]: unknown;
 };
 
-export const getWidgets = createAppAsyncThunk('pendingVisitsDashboardApp/widgets/getWidgets', async () => {
-	const response = await axios.get('/api/widgets/pending-visits');
+export const getWidgets = createAppAsyncThunk('pendingVisitsDashboardApp/widgets/getWidgets', async (params?: { userId?: number; regionId?: number; type?: number; identification?: string; name?: string; status?: string }) => {
+	const response = await axios.get('/api/widgets/pending-visits', { params });
 
 	const data = (await response.data) as WidgetsType;
 

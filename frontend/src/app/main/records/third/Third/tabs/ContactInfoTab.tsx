@@ -3,12 +3,13 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Controller, useFormContext } from 'react-hook-form';
 
-const departamentosColombia = [
+const departamentosPaises = [
 	"Amazonas", "Antioquia", "Arauca", "Atlántico", "Bolívar", "Boyacá", "Caldas",
 	"Caquetá", "Casanare", "Cauca", "Cesar", "Chocó", "Córdoba", "Cundinamarca",
 	"Guainía", "Guaviare", "Huila", "La Guajira", "Magdalena", "Meta", "Nariño",
 	"Norte de Santander", "Putumayo", "Quindío", "Risaralda", "San Andrés y Providencia",
-	"Santander", "Sucre", "Tolima", "Valle del Cauca", "Vaupés", "Vichada"
+	"Santander", "Sucre", "Tolima", "Valle del Cauca", "Vaupés", "Vichada",
+	"Chile", "Perú", "República Dominicana", "El Salvador", "Guatemala"
 ];
 
 /**
@@ -106,7 +107,7 @@ function ContactInfoTab({ setTabValue }: Props) {
 				control={control}
 				render={({ field: { onChange, value } }) => (
 					<Autocomplete
-						options={departamentosColombia}
+						options={departamentosPaises}
 						value={value || null}
 						onChange={(event, newValue) => {
 							onChange(newValue);

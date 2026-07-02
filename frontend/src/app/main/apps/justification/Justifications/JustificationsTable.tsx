@@ -19,6 +19,12 @@ import format from 'date-fns/format';
 import { getJustifications, selectJustifications, selectSearchText } from '../store/justificationsSlice';
 import JustificationsPartieTableHead from './JustificationsTableHead';
 import { JustificationType } from '../types/JustificationType';
+import { getThirdRegions, selectThirdRegions } from '../../../records/third/store/thirdRegionsSlice';
+import { getUsers, selectUsers } from '../../../records/user/store/usersSlice';
+import { selectUser } from 'app/store/user/userSlice';
+import * as XLSX from 'xlsx';
+import { Select, MenuItem, FormControl, InputLabel, SelectChangeEvent, Button } from '@mui/material';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 
 type ProductsTableProps = WithRouterProps & {
 	navigate: (path: string) => void;
@@ -34,6 +40,10 @@ function ProductsTable(props: ProductsTableProps) {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	const searchText = useAppSelector(selectSearchText);
 
+	const user = useAppSelector(selectUser);
+	const thirdRegions = useAppSelector(selectThirdRegions);
+	const users = useAppSelector(selectUsers);
+
 	const [loading, setLoading] = useState(true);
 	const [selected, setSelected] = useState<string[]>([]);
 	const [data, setData] = useState(justifications);
@@ -46,10 +56,16 @@ function ProductsTable(props: ProductsTableProps) {
 		direction: 'desc',
 		id: ''
 	});
+	const [selectedRegion, setSelectedRegion] = useState<string>('0');
+	const [selectedUser, setSelectedUser] = useState<string>('0');
 
 	useEffect(() => {
-		dispatch(getJustifications()).then(() => setLoading(false));
-	}, [dispatch]);
+		if (user.role.includes('Administrador')) {
+			dispatch(getThirdRegions());
+			dispatch(getUsers());
+		}
+		dispatch(getJustifications({ regionId: parseInt(selectedRegion), userId: parseInt(selectedUser) })).then(() => setLoading(false));
+	}, [dispatch, user.role, selectedRegion, selectedUser]);
 
 	useEffect(() => {
 		if (searchText.length !== 0) {
@@ -142,8 +158,82 @@ function ProductsTable(props: ProductsTableProps) {
 		);
 	}
 
+	const isAdmin = () => {
+		if (user.role.includes('Administrador')) {
+			return true;
+		}
+		return false;
+	};
+
+	const handleRegionChange = (event: SelectChangeEvent<string>) => {
+		setSelectedRegion(event.target.value);
+	};
+
+	const handleUserChange = (event: SelectChangeEvent<string>) => {
+		setSelectedUser(event.target.value);
+	};
+
+	const handleExport = () => {
+		const dataToExport = data.map(row => ({
+			"ID": row.id,
+			"Tercero": row.third.name,
+			"Fecha": format(new Date(row.date), 'dd/MM/yyyy hh:mm a'),
+			"Justificación": row.description
+		}));
+		const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, "Justificaciones");
+		XLSX.writeFile(workbook, "Justificaciones.xlsx");
+	};
+
 	return (
 		<div className="w-full flex flex-col min-h-full">
+			<div className="p-10 m-5 flex items-center justify-between flex-wrap gap-16">
+				<div className="flex gap-16 flex-wrap">
+					{isAdmin() && (
+						<>
+							<FormControl size="small" style={{ minWidth: 200 }}>
+								<InputLabel>Regional</InputLabel>
+								<Select
+									value={selectedRegion}
+									label="Regional"
+									onChange={handleRegionChange}
+								>
+									<MenuItem value="0">Todas las regionales</MenuItem>
+									{thirdRegions?.map((r) => (
+										<MenuItem key={r.id} value={r.id.toString()}>
+											{r.name}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+							<FormControl size="small" style={{ minWidth: 200 }}>
+								<InputLabel>Asesor / Representante</InputLabel>
+								<Select
+									value={selectedUser}
+									label="Asesor / Representante"
+									onChange={handleUserChange}
+								>
+									<MenuItem value="0">Todos los asesores</MenuItem>
+									{users?.map((u) => (
+										<MenuItem key={u.id} value={u.id.toString()}>
+											{u.firstName} {u.lastName}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</>
+					)}
+				</div>
+				<Button
+					variant="contained"
+					color="primary"
+					onClick={handleExport}
+					startIcon={<FuseSvgIcon>heroicons-outline:download</FuseSvgIcon>}
+				>
+					Exportar a Excel
+				</Button>
+			</div>
 			<FuseScrollbars className="grow overflow-x-auto">
 				<Table
 					stickyHeader

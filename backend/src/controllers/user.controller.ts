@@ -10,6 +10,7 @@ import ThirdsPortfolio from '../models/ThirdsPortfolio';
 import Third from '../models/Third';
 import portfolioService from '../services/portfolio.service';
 import SessionLog from '../models/SessionLog';
+import UserCategory from '../models/UserCategory';
 import { Op } from 'sequelize';
 
 const generatePassword = () => {
@@ -25,7 +26,7 @@ const generatePassword = () => {
 
 const createUser = async (req: any, res: any) => {
   try {
-    const { email, firstName, lastName, phone, mobile, classificationId, category, regionId, status, coordinatorId, permissions } = req.body;
+    const { email, firstName, lastName, phone, mobile, classificationId, categoryId, regionId, status, coordinatorId, permissions } = req.body;
     const { userId } = req;
 
     let password = generatePassword();
@@ -48,7 +49,7 @@ const createUser = async (req: any, res: any) => {
         password: await User.prototype.encryptPassword(password),
         phone,
         mobile,
-        category,
+        categoryId,
         classificationId,
         regionId,
         status,
@@ -208,6 +209,9 @@ const getUsers = async (req: any, res: any) => {
       },
       {
         model: Region
+      },
+      {
+        model: UserCategory
       }
     ]
   });
@@ -228,6 +232,9 @@ const getUser = async (req: any, res: any) => {
       },
       {
         model: Region
+      },
+      {
+        model: UserCategory
       },
       {
         model: Portfolio,
@@ -306,7 +313,7 @@ const updateUserById = async (req: any, res: any) => {
 
   await User.update(req.body, {
     where: { id: userId },
-    fields: ['firstName', 'lastName', 'email', 'phone', 'mobile', 'category', 'classificationId', 'regionId', 'status', 'coordinatorId', 'permissions']
+    fields: ['firstName', 'lastName', 'email', 'phone', 'mobile', 'categoryId', 'classificationId', 'regionId', 'status', 'coordinatorId', 'permissions']
   });
 
   //const token = User.prototype.generateAuthToken(userFound.id);
@@ -320,6 +327,9 @@ const updateUserById = async (req: any, res: any) => {
       },
       {
         model: Region
+      },
+      {
+        model: UserCategory
       }
     ]
   });
@@ -706,6 +716,29 @@ const getSessionLogs = async (req: any, res: any) => {
   }
 };
 
+const adminChangePassword = async (req: any, res: any) => {
+  const { userId } = req.params;
+  const { newPassword } = req.body;
+
+  try {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const encryptedPassword = await User.prototype.encryptPassword(newPassword);
+    await User.update(
+      { password: encryptedPassword },
+      { where: { id: userId } }
+    );
+
+    res.status(200).json({ message: "Contraseña actualizada correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar la contraseña por el administrador:", error);
+    res.status(500).json({ message: "Error interno al actualizar la contraseña" });
+  }
+};
+
 export {
   createUser,
   getUsers,
@@ -719,5 +752,6 @@ export {
   desapproveThird,
   approveThirdsBulk,
   desapproveThirdsBulk,
-  getSessionLogs
+  getSessionLogs,
+  adminChangePassword
 };

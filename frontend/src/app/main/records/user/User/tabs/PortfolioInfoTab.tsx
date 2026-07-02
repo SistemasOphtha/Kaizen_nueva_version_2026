@@ -19,7 +19,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { PortfolioType } from '../../types/UserType';
 import ThirdPortfolioItem from './components/ThirdPortfolioItem';
 import { approvePanel, desapprovePanel, getUser, approvePanelsBulk, desapprovePanelsBulk } from '../../store/userSlice';
-import { assignThirdByAdmin, unassignThirdByAdmin, unassignThirdsByAdminBulk } from '../../../third/store/thirdSlice';
+import { assignThirdByAdmin, unassignThirdByAdmin, unassignThirdsByAdminBulk, assignThirdsByAdminBulk } from '../../../third/store/thirdSlice';
 import { selectThirds } from '../../../third/store/thirdsSlice';
 import { ThirdType } from '../../../third/types/ThirdType';
 
@@ -36,7 +36,7 @@ function PortfolioInfoTab() {
 
 	const portfolios = watch('portfolios') as PortfolioType[];
 
-	const [thirdId, setThirdId] = useState<number>(0);
+	const [thirdIds, setThirdIds] = useState<number[]>([]);
 	const [selectedPanels, setSelectedPanels] = useState<Record<number, number[]>>({});
 
 	const item = {
@@ -126,35 +126,37 @@ function PortfolioInfoTab() {
 					Asignar panel
 				</Typography>
 				<Autocomplete
-					freeSolo
+					multiple
 					style={{ marginTop: '8px' }}
 					options={thirds}
 					getOptionLabel={(option: ThirdType) =>
 						`${option.identification} - ${option.name} ${option.additionalName}`
 					}
-					onChange={(event, value: ThirdType | null) => {
-						setThirdId(value ? value.id : 0);
+					onChange={(event, value: ThirdType[]) => {
+						setThirdIds(value.map((v) => v.id));
 					}}
 					renderInput={(params) => (
 						<TextField
 							{...params}
-							label="Seleccionar el panel a asignar"
+							label="Seleccionar el panel o paneles a asignar"
 						/>
 					)}
 				/>
 				<Button
 					variant="contained"
 					color="primary"
-					disabled={thirdId === 0}
-					onClick={() => {
+					disabled={thirdIds.length === 0}
+					onClick={async () => {
 						const { userId } = routeParams;
-						dispatch(assignThirdByAdmin({ thirdId, userId: Number(userId) }));
-						setTimeout(() => {
-							dispatch(getUser(userId.toString()));
-						}, 2000);
+						if (userId) {
+							await dispatch(assignThirdsByAdminBulk({ thirdIds, userId: Number(userId) }));
+							setTimeout(() => {
+								dispatch(getUser(userId.toString()));
+							}, 2000);
+						}
 					}}
 				>
-					Asignar
+					Asignar Seleccionados
 				</Button>
 			</div>
 			{portfolios && portfolios.length > 0 && (
@@ -204,18 +206,18 @@ function PortfolioInfoTab() {
 															<Checkbox
 																checked={
 																	(selectedPanels[portf.id]?.length || 0) ===
-																		(portf.thirds_portfolios?.length || 0) &&
-																	(portf.thirds_portfolios?.length || 0) > 0
+																		(portf.thirds_portfolios?.filter((t) => t.third).length || 0) &&
+																	(portf.thirds_portfolios?.filter((t) => t.third).length || 0) > 0
 																}
 																indeterminate={
 																	!!selectedPanels[portf.id]?.length &&
 																	(selectedPanels[portf.id]?.length || 0) <
-																		(portf.thirds_portfolios?.length || 0)
+																		(portf.thirds_portfolios?.filter((t) => t.third).length || 0)
 																}
 																onChange={() =>
 																	toggleSelectAll(
 																		portf.id,
-																		portf.thirds_portfolios?.map(
+																		portf.thirds_portfolios?.filter((t) => t.third).map(
 																			(t) => t.third.id
 																		) || []
 																	)
@@ -259,7 +261,7 @@ function PortfolioInfoTab() {
 												)}
 												<CardContent className="p-0">
 													<List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-														{portf?.thirds_portfolios?.map((thirdPort, index) => {
+														{portf?.thirds_portfolios?.filter((tp) => tp.third).map((thirdPort, index) => {
 															const isSelected = (
 																selectedPanels[portf.id] || []
 															).includes(thirdPort.third.id);

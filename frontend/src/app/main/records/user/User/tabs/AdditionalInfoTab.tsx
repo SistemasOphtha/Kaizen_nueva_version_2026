@@ -1,33 +1,35 @@
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
-import { useAppSelector } from 'app/store';
+import { useAppSelector, useAppDispatch } from 'app/store';
 // import moment from 'moment';
 import { Controller, useFormContext } from 'react-hook-form';
 import Autocomplete from '@mui/material/Autocomplete';
 import { selectUserClassifications } from '../../store/userClassificationsSlice';
 import { selectUserRegions } from '../../store/userRegionsSlice';
+import { selectUserCategories } from '../../../../administration/user-categories/store/userCategoriesSlice';
+import { getUserCategories } from '../../../../administration/user-categories/store/userCategoriesSlice';
+import { useEffect } from 'react';
 
 /**
  * The basic info tab.
  */
 function AdditionalInfoTab() {
 	const methods = useFormContext();
+	const dispatch = useAppDispatch();
 	const { control, formState } = methods;
 	const { errors } = formState;
 
 	const userClassifications = useAppSelector(selectUserClassifications);
 	const userRegions = useAppSelector(selectUserRegions);
+	const userCategories = useAppSelector(selectUserCategories);
+
+	useEffect(() => {
+		dispatch(getUserCategories() as any);
+	}, [dispatch]);
 
 	// Calcula la fecha de hace 18 años a partir de la fecha actual
 	const maxDate = new Date();
 	maxDate.setFullYear(maxDate.getFullYear() - 18);
-
-	const categoryItems = [
-		{ label: 'Junior', name: 'Junior' },
-		{ label: 'Senior', name: 'Senior' },
-		{ label: 'Comercial', name: 'Comercial' },
-		{ label: 'Coordinador', name: 'Coordinador' }
-	];
 
 	return (
 		<div>
@@ -58,25 +60,26 @@ function AdditionalInfoTab() {
 			/>
 
 			<Controller
-				name="category"
+				name="categoryId"
 				control={control}
 				render={({ field }) => (
 					<Autocomplete
-						id="category"
+						id="categoryId"
 						className="mt-32"
 						autoFocus
-						options={categoryItems}
-						getOptionLabel={(option) => option.label}
-						onChange={(_, data) => (data ? field.onChange(data.name) : field.onChange(data))}
-						value={categoryItems.find((item) => item.name === field.value) || null}
+						options={userCategories || []}
+						getOptionLabel={(option) => option.name}
+						onChange={(_, data) => (data ? field.onChange(data.id) : field.onChange(data))}
+						value={userCategories.find((item) => item.id === field.value) || null}
+						renderOption={(props, option) => <MenuItem {...props}>{option.name}</MenuItem>}
 						fullWidth
 						renderInput={(params) => (
 							<TextField
 								{...params}
 								required
 								label="Categoría"
-								error={!!errors.category}
-								helperText={errors?.category?.message as string}
+								error={!!errors.categoryId}
+								helperText={errors?.categoryId?.message as string}
 							/>
 						)}
 					/>

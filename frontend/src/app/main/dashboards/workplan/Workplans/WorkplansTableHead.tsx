@@ -60,6 +60,13 @@ const rows: rowType[] = [
 		disablePadding: false,
 		label: 'Descripción',
 		sort: false
+	},
+	{
+		id: 'typeEvent',
+		align: 'left',
+		disablePadding: false,
+		label: 'Tipo',
+		sort: false
 	}
 ];
 

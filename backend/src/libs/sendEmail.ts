@@ -1,18 +1,23 @@
 import nodemailer from 'nodemailer';
 
-export const sendEmail = (email: string, subject: string, message: string): void => {
+export const sendEmail = (email: string, subject: string, message: string, customSmtp?: any): void => {
+  const host = customSmtp?.host || process.env.EMAIL_HOST;
+  const port = parseInt(customSmtp?.port || process.env.EMAIL_PORT || '465', 10);
+  const user = customSmtp?.user || process.env.EMAIL_SEND;
+  const pass = customSmtp?.pass || process.env.EMAIL_PASS;
+
   const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT || '465', 10),
+    host,
+    port,
     secure: true,
     auth: {
-      user: process.env.EMAIL_SEND,
-      pass: process.env.EMAIL_PASS,
+      user,
+      pass,
     },
   });
 
   const mailOptions = {
-    from: process.env.EMAIL_SEND,
+    from: user,
     to: email, // Destinatario
     subject: `[${subject}]`,
     html: message,

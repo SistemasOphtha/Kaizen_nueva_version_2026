@@ -102,15 +102,17 @@ function UserMenu() {
 					</>
 				) : (
 					<>
-						<MenuItem
-							component={NavLink}
-							to="/settings"
-						>
-							<ListItemIcon className="min-w-40">
-								<FuseSvgIcon>heroicons-outline:cog</FuseSvgIcon>
-							</ListItemIcon>
-							<ListItemText primary="Configuración" />
-						</MenuItem>
+						{user.role.includes('Administrador') && (
+							<MenuItem
+								component={NavLink}
+								to="/settings"
+							>
+								<ListItemIcon className="min-w-40">
+									<FuseSvgIcon>heroicons-outline:cog</FuseSvgIcon>
+								</ListItemIcon>
+								<ListItemText primary="Configuración" />
+							</MenuItem>
+						)}
 						<MenuItem
 							component={NavLink}
 							to="/settings/change-password"

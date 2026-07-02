@@ -25,6 +25,7 @@ import NotificationsRoutes from './routes/notifications.routes';
 import QuicksRoutes from './routes/quicks.routes';
 import PortfolioRoutes from './routes/portfolio.routes';
 import ReportsRoutes from './routes/reports.routes';
+import UserCategoryRoutes from './routes/userCategory.routes';
 
 const app = express();
 
@@ -69,5 +70,22 @@ app.use("/api/notifications",  NotificationsRoutes);
 app.use("/api/quicks", QuicksRoutes);
 app.use("/api/portfolios", PortfolioRoutes);
 app.use("/api/reports", ReportsRoutes);
+app.use("/api/user-categories", UserCategoryRoutes);
+
+// ==========================================
+// CAZADOR GLOBAL DE ERRORES OCULTOS
+// ==========================================
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('\n🚨 [ERROR FATAL OCULTO EN RUTA] 🚨');
+    console.error(`Ruta: ${req.method} ${req.originalUrl}`);
+    console.error(`Mensaje: ${err.message}`);
+    console.error(`Stack:`, err.stack);
+    console.error('======================================\n');
+    
+    res.status(err.status || 500).json({
+        error: 'Ocurrió un error interno en el servidor',
+        message: err.message
+    });
+});
 
 export default app;

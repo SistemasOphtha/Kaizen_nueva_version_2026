@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkkaizen_frontend=self.webpackChunkkaizen_frontend||[]).push([[856],{30856:(n,e,t)=>{t.r(e),t.d(e,{default:()=>u});var r=t(58467),s=t(46417);const u=function(){return(0,s.jsx)(r.j3,{})}}}]);

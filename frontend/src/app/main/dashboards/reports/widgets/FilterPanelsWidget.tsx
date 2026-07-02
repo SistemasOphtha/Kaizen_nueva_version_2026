@@ -298,7 +298,7 @@ function FilterPanelsWidget() {
 						<Button
 							variant="contained"
 							color="primary"
-							onClick={() => exportToExcel(`Panels_Report_${new Date().getTime()}`, paginatedRows)}
+							onClick={() => exportToExcel(`Panels_Report_${new Date().getTime()}`, filteredRows as any)}
 						>
 							Exportar a Excel
 						</Button>

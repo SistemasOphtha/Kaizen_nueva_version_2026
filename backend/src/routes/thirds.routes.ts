@@ -12,6 +12,7 @@ import { createThird,
     assignThirdPortfolioByAdmin,
     assignOrCreateThird,
     unassignThirdsPortfolioByAdminBulk,
+    assignThirdsPortfolioByAdminBulk,
     uploadHabeasData,
     saveSignature } from '../controllers/third.controller';
 import { isAdmin, isUser, verifyToken } from '../middlewares/authJwt';
@@ -34,6 +35,7 @@ router.post("/unassign/:thirdId/:userId", [verifyToken, isAdmin], unassignThirdP
 router.post("/assign/:thirdId/:userId", [verifyToken, isAdmin], assignThirdPortfolioByAdmin);
 router.post("/assign-or-create", [verifyToken, isAdmin], assignOrCreateThird);
 router.post("/unassign-bulk/:userId", [verifyToken, isAdmin], unassignThirdsPortfolioByAdminBulk);
+router.post("/assign-bulk/:userId", [verifyToken, isAdmin], assignThirdsPortfolioByAdminBulk);
 
 // Rutas de Habeas Data e Firma Digital
 router.post("/:thirdId/habeas-data", [verifyToken, upload.single('file')], uploadHabeasData);

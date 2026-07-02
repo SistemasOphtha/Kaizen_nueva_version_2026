@@ -66,8 +66,12 @@ export const updateThird = createAppAsyncThunk<ThirdType, DeepPartial<ThirdType>
 	async (third) => {
 		const response = await axios.put(`/api/thirds/${third.id}`, third);
 
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+		const responseData = (await response.data) as any;
+		
+		// Handle both ThirdResponseDTO directly and SuccessResponseDTO
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-		const data = (await response.data) as ThirdType;
+		const data = (responseData.data ? responseData.data : responseData) as ThirdType;
 
 		return data;
 	}
@@ -170,6 +174,21 @@ export const unassignThirdsByAdminBulk = createAppAsyncThunk<
 			thirdIds
 		});
 		return response.data as { removed: number[]; failed: { id: number; reason: string }[] };
+	} catch (error) {
+		const axiosError = error as AxiosError;
+		return rejectWithValue(axiosError.response?.data ?? axiosError.message);
+	}
+});
+
+export const assignThirdsByAdminBulk = createAppAsyncThunk<
+	{ assigned: number[]; failed: { id: number; reason: string }[] },
+	{ userId: number; thirdIds: number[] }
+>('thirdsApp/third/assignThirdsByAdminBulk', async ({ userId, thirdIds }, { rejectWithValue }) => {
+	try {
+		const response = await axios.post(`/api/thirds/assign-bulk/${userId}`, {
+			thirdIds
+		});
+		return response.data as { assigned: number[]; failed: { id: number; reason: string }[] };
 	} catch (error) {
 		const axiosError = error as AxiosError;
 		return rejectWithValue(axiosError.response?.data ?? axiosError.message);

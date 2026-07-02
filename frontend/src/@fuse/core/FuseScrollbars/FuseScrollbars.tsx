@@ -8,7 +8,7 @@ import { useAppSelector } from 'app/store';
 import { selectCustomScrollbarsEnabled } from 'app/store/fuse/settingsSlice';
 
 const Root = styled('div')(() => ({
-	overscrollBehavior: 'contain',
+	overscrollBehavior: 'auto',
 	minHeight: '100%'
 }));
 

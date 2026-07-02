@@ -9,10 +9,10 @@ import { AppRootStateType } from '.';
 /**
  * Get justifications from server
  */
-export const getJustifications = createAppAsyncThunk<JustificationsType>(
+export const getJustifications = createAppAsyncThunk<JustificationsType, { userId?: number; regionId?: number } | undefined>(
 	'justificationsApp/justifications/getJustifications',
-	async () => {
-		const response = await axios.get('/api/justifications');
+	async (params) => {
+		const response = await axios.get('/api/justifications', { params });
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		const data = (await response.data) as JustificationsType;
 

@@ -24,6 +24,10 @@ export const verifyToken = async (req: any, res: Response, next: NextFunction): 
     });
     if (!user) return res.status(404).json({ message: "No user found" });
 
+    if (user.dataValues.status === 'inactive') {
+      return res.status(401).json({ message: "User is inactive" });
+    }
+
     req.userId = decoded.id;
     req.rol = user.dataValues.user_classification.name;
     next();

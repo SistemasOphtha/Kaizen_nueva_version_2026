@@ -6,8 +6,9 @@ import { useAppSelector } from 'app/store';
 import Autocomplete from '@mui/material/Autocomplete';
 import MenuItem from '@mui/material/MenuItem';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useSpeechToText } from '../../../../../hooks/useSpeechToText';
 import { selectUser } from 'app/store/user/userSlice';
 import { ThirdTypeType } from '../../../../records/third/types/ThirdTypeType';
 // import { VisitType } from '../../types/VisitType';
@@ -37,58 +38,8 @@ function BasicInfoTab() {
 	const typeId = watch('typeId') as number;
 	const userId = watch('userId') as number;
 
-	const [listeningField, setListeningField] = useState<string | null>(null);
-	const recognitionRef = useRef<any>(null);
-
-	const toggleListening = (fieldName: string, onChange: (val: string) => void, currentValue: string) => {
-		const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-		
-		if (!SpeechRecognition) {
-			alert('El reconocimiento de voz no está soportado en este navegador. Por favor use Google Chrome.');
-			return;
-		}
-
-		if (listeningField === fieldName) {
-			if (recognitionRef.current) {
-				recognitionRef.current.stop();
-			}
-			setListeningField(null);
-		} else {
-			if (recognitionRef.current) {
-				recognitionRef.current.stop();
-			}
-
-			const recognition = new SpeechRecognition();
-			recognition.continuous = true;
-			recognition.interimResults = false;
-			recognition.lang = 'es-ES';
-
-			recognition.onstart = () => {
-				setListeningField(fieldName);
-			};
-
-			recognition.onresult = (event: any) => {
-				const transcript = event.results[event.results.length - 1][0].transcript;
-				const newVal = currentValue ? `${currentValue} ${transcript}` : transcript;
-				onChange(newVal);
-			};
-
-			recognition.onerror = (event: any) => {
-				console.error('Speech recognition error:', event.error);
-				if (recognitionRef.current) {
-					recognitionRef.current.stop();
-				}
-				setListeningField(null);
-			};
-
-			recognition.onend = () => {
-				setListeningField(null);
-			};
-
-			recognitionRef.current = recognition;
-			recognition.start();
-		}
-	};
+	const objectiveMic = useSpeechToText('objective');
+	const commentMic = useSpeechToText('comment');
 
 	useEffect(() => {
 		if (typeId) {
@@ -230,12 +181,12 @@ function BasicInfoTab() {
 							endAdornment: (
 								<InputAdornment position="end" className="self-start mt-8">
 									<IconButton
-										onClick={() => toggleListening('objective', field.onChange, field.value as string)}
-										color={listeningField === 'objective' ? 'error' : 'default'}
-										title={listeningField === 'objective' ? 'Detener dictado' : 'Dictar por voz'}
+										onClick={objectiveMic.toggleListening}
+										color={objectiveMic.isListening ? 'error' : 'default'}
+										title={objectiveMic.isListening ? 'Detener dictado' : 'Dictar por voz'}
 									>
 										<FuseSvgIcon size={20}>
-											{listeningField === 'objective' ? 'heroicons-solid:microphone' : 'heroicons-outline:microphone'}
+											{objectiveMic.isListening ? 'heroicons-solid:microphone' : 'heroicons-outline:microphone'}
 										</FuseSvgIcon>
 									</IconButton>
 								</InputAdornment>
@@ -263,12 +214,12 @@ function BasicInfoTab() {
 							endAdornment: (
 								<InputAdornment position="end" className="self-start mt-8">
 									<IconButton
-										onClick={() => toggleListening('comment', field.onChange, field.value as string)}
-										color={listeningField === 'comment' ? 'error' : 'default'}
-										title={listeningField === 'comment' ? 'Detener dictado' : 'Dictar por voz'}
+										onClick={commentMic.toggleListening}
+										color={commentMic.isListening ? 'error' : 'default'}
+										title={commentMic.isListening ? 'Detener dictado' : 'Dictar por voz'}
 									>
 										<FuseSvgIcon size={20}>
-											{listeningField === 'comment' ? 'heroicons-solid:microphone' : 'heroicons-outline:microphone'}
+											{commentMic.isListening ? 'heroicons-solid:microphone' : 'heroicons-outline:microphone'}
 										</FuseSvgIcon>
 									</IconButton>
 								</InputAdornment>

@@ -7,6 +7,8 @@ import dbConection from '../database';
 import UserClassification from './UserClassification';
 import Region from './Region';
 
+import UserCategory from './UserCategory';
+
 const User = dbConection.define('users', {
    id: {
       type: DataTypes.INTEGER,
@@ -47,8 +49,8 @@ const User = dbConection.define('users', {
       type: DataTypes.STRING(180),
       allowNull: false
    },
-   category: {
-      type: DataTypes.STRING(50),
+   categoryId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
    },
    classificationId: {
@@ -113,6 +115,9 @@ const User = dbConection.define('users', {
       // Definir relaciones en ambos sentidos
       User.belongsTo(UserClassification, {foreignKey: 'classificationId'});
       UserClassification.hasMany(User, {foreignKey: 'classificationId'});
+
+      User.belongsTo(UserCategory, {foreignKey: 'categoryId'});
+      UserCategory.hasMany(User, {foreignKey: 'categoryId'});
       
       User.belongsTo(Region, {foreignKey: 'regionId'});
       Region.hasMany(User, {foreignKey: 'regionId'});

@@ -40,34 +40,85 @@ const thirdsAdapter = createEntityAdapter<ThirdType>({});
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 export const selectSearchText = (state: AppRootStateType) => state.thirdsApp?.thirds?.searchText;
+export const selectThirdsFilterType = (state: AppRootStateType) => state.thirdsApp?.thirds?.filterType || 'all';
+export const selectThirdsFilterStatus = (state: AppRootStateType) => state.thirdsApp?.thirds?.filterStatus || 'all';
+export const selectThirdsFilterAdvisor = (state: AppRootStateType) => state.thirdsApp?.thirds?.filterAdvisor || 'all';
+export const selectThirdsFilterRegion = (state: AppRootStateType) => state.thirdsApp?.thirds?.filterRegion || 'all';
+export const selectThirdsFilterSpecialty = (state: AppRootStateType) => state.thirdsApp?.thirds?.filterSpecialty || 'all';
+export const selectThirdsFilterClassification = (state: AppRootStateType) => state.thirdsApp?.thirds?.filterClassification || 'all';
 
 export const { selectAll: selectThirds, selectById: selectThirdsById } = thirdsAdapter.getSelectors(
 	(state: AppRootStateType) => state.thirdsApp?.thirds
 );
 
-export const selectFilteredThirds = createSelector([selectThirds, selectSearchText], (thirds, searchText) => {
-	if (searchText.length === 0) {
-		return thirds;
+export const selectFilteredThirds = createSelector(
+	[
+		selectThirds, 
+		selectSearchText, 
+		selectThirdsFilterType, 
+		selectThirdsFilterStatus,
+		selectThirdsFilterAdvisor,
+		selectThirdsFilterRegion,
+		selectThirdsFilterSpecialty,
+		selectThirdsFilterClassification
+	],
+	(thirds, searchText, filterType, filterStatus, filterAdvisor, filterRegion, filterSpecialty, filterClassification) => {
+		let filtered = thirds;
+
+		if (filterType !== 'all') {
+			filtered = filtered.filter((third) => third.third_type?.name === filterType);
+		}
+
+		if (filterStatus !== 'all') {
+			filtered = filtered.filter((third) => third.status === filterStatus);
+		}
+
+		if (filterRegion !== 'all') {
+			filtered = filtered.filter((third) => third.regionId === Number(filterRegion));
+		}
+
+		if (filterSpecialty !== 'all') {
+			filtered = filtered.filter((third) => third.specialtyId === Number(filterSpecialty));
+		}
+
+		if (filterClassification !== 'all') {
+			filtered = filtered.filter((third) => third.classificationId === Number(filterClassification));
+		}
+
+		if (filterAdvisor !== 'all') {
+			filtered = filtered.filter((third) =>
+				third.thirds_portfolios?.some(
+					(p) => p.portfolio?.userId === Number(filterAdvisor) || p.portfolio?.user?.id === Number(filterAdvisor)
+				)
+			);
+		}
+
+		if (searchText.length === 0) {
+			return filtered;
+		}
+
+		const searchWords = searchText.toLowerCase().split(/\s+/).filter(Boolean);
+		if (searchWords.length === 0) {
+			return filtered;
+		}
+
+		return filtered.filter((third) => {
+			const name = (third.name || '').toLowerCase();
+			const additionalName = (third.additionalName || '').toLowerCase();
+			const identification = (third.identification || '').toLowerCase();
+			const email = (third.email || '').toLowerCase();
+			const city = (third.city || '').toLowerCase();
+			const specialty = (third.third_specialty?.name || '').toLowerCase();
+			const classification = (third.third_classification?.name || '').toLowerCase();
+			const type = (third.third_type?.name || '').toLowerCase();
+			const region = (third.region?.name || '').toLowerCase();
+			const representative = third.thirds_portfolios?.map(p => `${p.portfolio?.user?.firstName || ''} ${p.portfolio?.user?.lastName || ''}`).join(' ').toLowerCase() || '';
+			
+			const fullText = `${name} ${additionalName} ${identification} ${email} ${city} ${specialty} ${classification} ${type} ${region} ${representative}`;
+			return searchWords.every((word) => fullText.includes(word));
+		});
 	}
-	const searchWords = searchText.toLowerCase().split(/\s+/).filter(Boolean);
-	if (searchWords.length === 0) {
-		return thirds;
-	}
-	return thirds.filter((third) => {
-		const name = (third.name || '').toLowerCase();
-		const additionalName = (third.additionalName || '').toLowerCase();
-		const identification = (third.identification || '').toLowerCase();
-		const email = (third.email || '').toLowerCase();
-		const city = (third.city || '').toLowerCase();
-		const specialty = (third.third_specialty?.name || '').toLowerCase();
-		const classification = (third.third_classification?.name || '').toLowerCase();
-		const type = (third.third_type?.name || '').toLowerCase();
-		const region = (third.region?.name || '').toLowerCase();
-		
-		const fullText = `${name} ${additionalName} ${identification} ${email} ${city} ${specialty} ${classification} ${type} ${region}`;
-		return searchWords.every((word) => fullText.includes(word));
-	});
-});
+);
 
 type GroupedThirdsType = {
 	group: string;
@@ -104,7 +155,13 @@ export const selectGroupedFilteredThirds = createSelector([selectFilteredThirds]
 });
 
 const initialState = thirdsAdapter.getInitialState({
-	searchText: ''
+	searchText: '',
+	filterType: 'all',
+	filterStatus: 'all',
+	filterAdvisor: 'all',
+	filterRegion: 'all',
+	filterSpecialty: 'all',
+	filterClassification: 'all'
 });
 
 /**
@@ -123,6 +180,24 @@ export const thirdsSlice = createSlice({
 				meta: undefined,
 				error: null
 			})
+		},
+		setThirdsFilterType: (state, action) => {
+			state.filterType = action.payload as string;
+		},
+		setThirdsFilterStatus: (state, action) => {
+			state.filterStatus = action.payload as string;
+		},
+		setThirdsFilterAdvisor: (state, action) => {
+			state.filterAdvisor = action.payload as string;
+		},
+		setThirdsFilterRegion: (state, action) => {
+			state.filterRegion = action.payload as string;
+		},
+		setThirdsFilterSpecialty: (state, action) => {
+			state.filterSpecialty = action.payload as string;
+		},
+		setThirdsFilterClassification: (state, action) => {
+			state.filterClassification = action.payload as string;
 		}
 	},
 	extraReducers: (builder) => {
@@ -142,7 +217,15 @@ export const thirdsSlice = createSlice({
 	}
 });
 
-export const { setThirdsSearchText } = thirdsSlice.actions;
+export const { 
+	setThirdsSearchText, 
+	setThirdsFilterType, 
+	setThirdsFilterStatus,
+	setThirdsFilterAdvisor,
+	setThirdsFilterRegion,
+	setThirdsFilterSpecialty,
+	setThirdsFilterClassification
+} = thirdsSlice.actions;
 
 export type thirdsSliceType = typeof thirdsSlice;
 

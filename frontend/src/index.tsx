@@ -25,6 +25,9 @@ if (!container) {
  */
 const root = createRoot(container);
 
+localStorage.removeItem('persist:fuse');
+localStorage.removeItem('fuse');
+
 root.render(<App />);
 
 // reportWebVitals();

@@ -13,6 +13,8 @@ import AppsConfigs from '../main/apps/appsConfigs';
 import DashboardsConfigs from '../main/dashboards/dashboardsConfigs';
 import RecordsConfigs from '../main/records/recordsConfigs';
 import SettingsConfigs from '../main/settings/settingsConfigs';
+import CommunicationsConfigs from '../main/communications/communicationsConfigs';
+import AdministrationConfigs from '../main/administration/administrationConfigs';
 
 const routeConfigs: FuseRouteConfigsType = [
 	SignOutConfig,
@@ -23,7 +25,9 @@ const routeConfigs: FuseRouteConfigsType = [
 	...AppsConfigs,
 	...DashboardsConfigs,
 	...RecordsConfigs,
-	...SettingsConfigs
+	...SettingsConfigs,
+	...CommunicationsConfigs,
+	...AdministrationConfigs
 ];
 
 /**

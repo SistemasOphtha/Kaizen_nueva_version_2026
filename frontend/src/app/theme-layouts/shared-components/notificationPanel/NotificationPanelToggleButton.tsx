@@ -17,7 +17,7 @@ type NotificationPanelToggleButtonProps = {
  * The notification panel toggle button.
  */
 function NotificationPanelToggleButton(props: NotificationPanelToggleButtonProps) {
-	const { children = <FuseSvgIcon>heroicons-outline:bell</FuseSvgIcon> } = props;
+	return null;
 
 	const notifications = useSelector(selectNotifications);
 

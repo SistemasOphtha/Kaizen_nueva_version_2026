@@ -14,8 +14,13 @@ const startServer = async () => {
         }
         
         // Sincronización de todos los modelos con la base de datos
-        await dbConection.sync({ alter: false });
+        await dbConection.sync({ alter: true });
         console.log('Modelos sincronizados con la base de datos');
+        
+        // Ejecutar migración de categorías si es necesario
+        const { migrateCategories } = await import('./src/utils/migrateCategories');
+        await migrateCategories();
+
         
         // Iniciar el servidor HTTP
         app.listen(PORT, () => {
@@ -35,3 +40,18 @@ const startServer = async () => {
 
 // Iniciar el servidor
 startServer();
+
+// ==========================================
+// CAZADOR DE ERRORES DE PROCESOS (PROMESAS ROTAS Y CRASHES)
+// ==========================================
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('\n💥 [PROMESA RECHAZADA Y NO MANEJADA] 💥');
+    console.error('Razón:', reason);
+    console.error('======================================\n');
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('\n🔥 [EXCEPCIÓN NO CAPTURADA] 🔥');
+    console.error('Error:', error);
+    console.error('======================================\n');
+});

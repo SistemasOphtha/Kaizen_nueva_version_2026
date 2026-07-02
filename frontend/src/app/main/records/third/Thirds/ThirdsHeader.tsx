@@ -12,22 +12,43 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 import { Box } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import { motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from 'app/store';
 import { Link } from 'react-router-dom';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as XLSX from 'xlsx';
-import { selectSearchText, setThirdsSearchText, getThirds } from '../store/thirdsSlice';
+import { 
+	selectSearchText, 
+	setThirdsSearchText, 
+	getThirds, 
+	selectFilteredThirds, 
+	setThirdsFilterType, 
+	setThirdsFilterStatus, 
+	selectThirdsFilterType, 
+	selectThirdsFilterStatus,
+	selectThirdsFilterAdvisor,
+	selectThirdsFilterRegion,
+	selectThirdsFilterSpecialty,
+	selectThirdsFilterClassification,
+	setThirdsFilterAdvisor,
+	setThirdsFilterRegion,
+	setThirdsFilterSpecialty,
+	setThirdsFilterClassification
+} from '../store/thirdsSlice';
 import { selectUser } from 'app/store/user/userSlice';
 import { selectThirdTypes, getThirdTypes } from '../store/thirdTypesSlice';
 import { selectThirdClassifications, getThirdClassifications } from '../store/thirdClassificationsSlice';
 import { selectThirdSpecialtys, getThirdSpecialtys } from '../store/thirdSpecialtysSlice';
 import { selectThirdRegions, getThirdRegions } from '../store/thirdRegionsSlice';
 import { selectThirdSubSpecialtys, getThirdSubSpecialtys } from '../store/thirdSubSpecialtysSlice';
+import { selectUsers, getUsers } from '../../user/store/usersSlice';
 import ThirdModel from '../models/ThirdModel';
 import { ThirdType } from '../types/ThirdType';
 import { importThird } from '../store/thirdSlice';
@@ -46,7 +67,22 @@ type ImportResultsType = {
 function ThirdsHeader() {
 	const dispatch = useAppDispatch();
 	const searchText = useAppSelector(selectSearchText);
+	const filterType = useAppSelector(selectThirdsFilterType);
+	const filterStatus = useAppSelector(selectThirdsFilterStatus);
+	const filterAdvisor = useAppSelector(selectThirdsFilterAdvisor);
+	const filterRegion = useAppSelector(selectThirdsFilterRegion);
+	const filterSpecialty = useAppSelector(selectThirdsFilterSpecialty);
+	const filterClassification = useAppSelector(selectThirdsFilterClassification);
+	const filteredThirds = useAppSelector(selectFilteredThirds);
+	const users = useAppSelector(selectUsers) || [];
 	const { role } = useAppSelector(selectUser);
+
+	useEffect(() => {
+		dispatch(getThirdRegions());
+		dispatch(getThirdSpecialtys());
+		dispatch(getThirdClassifications());
+		dispatch(getUsers());
+	}, [dispatch]);
 	const { t } = useTranslation('thirdPage');
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const [importResults, setImportResults] = useState<{
@@ -153,7 +189,7 @@ function ThirdsHeader() {
 	}
 
 	function inferTypeName(rowMap: RowMap): string {
-		const tipo = rowMap.tipo_panel || rowMap.tipo || rowMap.tipotercero || '';
+		const tipo = rowMap.tipologia || rowMap.tipo_panel || rowMap.tipo || rowMap.tipotercero || '';
 		if (tipo) {
 			const t = normalize(s(tipo));
 			if (t.includes('medico')) return 'Medico';
@@ -277,7 +313,7 @@ function ThirdsHeader() {
 						specialtyId,
 						regionId,
 						subSpecialtyId,
-						representative: s(map.representante)
+						representative: s(map.correo_representante || map.correorepresentante || map.representante)
 					};
 				} else if (typeName === 'Drogueria') {
 					let specialtyId = getIdByName(s(map.especialidad || 'Otras'), specialtiesList) || 10;
@@ -302,7 +338,7 @@ function ThirdsHeader() {
 						specialtyId,
 						regionId,
 						subSpecialtyId: null,
-						representative: s(map.representante)
+						representative: s(map.correo_representante || map.correorepresentante || map.representante)
 					};
 				} else { // Comercial
 					let specialtyId = getIdByName(s(map.especialidad || 'Otras'), specialtiesList) || 10;
@@ -326,7 +362,7 @@ function ThirdsHeader() {
 						specialtyId,
 						regionId,
 						subSpecialtyId: null,
-						representative: s(map.representante)
+						representative: s(map.correo_representante || map.correorepresentante || map.representante)
 					};
 				}
 
@@ -410,80 +446,33 @@ function ThirdsHeader() {
 	const generateTemplate = (type: string) => {
 		let templateData: unknown[] = [];
 
-		switch (type) {
-			case 'medico':
-				templateData = [
-					{
-						tipo_panel: 'Medico',
-						tipo_identificacion: 'CC',
-						identificacion: '123456789',
-						nombre: 'Dr. Nombre',
-						apellido: 'Apellido',
-						genero: 'Masculino/Femenino',
-						correo: 'email@dominio.com',
-						direccion: 'Dirección completa',
-						telefono: 'Teléfono fijo',
-						celular: 'Teléfono celular',
-						ciudad: 'Ciudad',
-						fecha_nacimiento: 'DD-MM',
-						impacto: 'Número 1-5',
-						estado: 'Activo/Inactivo',
-						clasificacion: 'A/B/C',
-						especialidad: 'Especialidad médica',
-						sub_especialidad: 'Subespecialidad médica',
-						region: 'Región',
-						representante: 'email@gmail.com'
-					}
-				];
-				break;
-			case 'drogeria':
-				templateData = [
-					{
-						tipo_panel: 'Drogeria',
-						tipo_identificacion: 'CC',
-						identificacion: '123456789',
-						nombre: 'Dr. Nombre',
-						nombre_administrador: 'Apellido',
-						fecha_nacimiento: 'DD-MM',
-						direccion: 'Dirección completa',
-						correo: 'email@dominio.com',
-						telefono: 'Teléfono fijo',
-						celular: 'Teléfono celular',
-						ciudad: 'Ciudad',
-						especialidad: 'Otras',
-						sub_especialidad: '',
-						surtidor: 'Cruz Verde',
-						region: 'Región',
-						impacto: 'Número 1-5',
-						estado: 'Activo/Inactivo',
-						representante: 'email@gmail.com'
-					}
-				];
-				break;
-			case 'comercial':
-				templateData = [
-					{
-						tipo_panel: 'Comercial',
-						tipo_identificacion: 'NIT',
-						identificacion: '123456789',
-						nombre: 'Nombre Empresa',
-						fecha_nacimiento: 'DD-MM',
-						direccion: 'Dirección completa',
-						correo: 'email@dominio.com',
-						telefono: 'Teléfono fijo',
-						celular: 'Teléfono celular',
-						ciudad: 'Ciudad',
-						especialidad: 'Otras',
-						sub_especialidad: '',
-						region: 'Región',
-						impacto: 'Número 1-5',
-						estado: 'Activo/Inactivo',
-						representante: 'email@gmail.com'
-					}
-				];
-				break;
-			default:
-				templateData = [];
+		if (type === 'unificada') {
+			templateData = [
+				{
+					tipologia: 'Medico / Drogueria / Comercial',
+					tipo_identificacion: 'CC / NIT',
+					identificacion: '123456789',
+					nombre: 'Dr. Nombre / Empresa',
+					apellido_administrador: 'Apellido / Admin',
+					genero: 'Masculino / Femenino',
+					correo: 'email@dominio.com',
+					direccion: 'Dirección completa',
+					telefono: 'Teléfono fijo',
+					celular: 'Teléfono celular',
+					ciudad: 'Ciudad',
+					fecha_nacimiento: 'DD-MM',
+					impacto: 'Número 1-5',
+					estado: 'Activo / Inactivo',
+					clasificacion: 'A / B / C',
+					especialidad: 'Especialidad médica',
+					sub_especialidad: 'Subespecialidad médica',
+					surtidor: 'Surtidor',
+					region: 'Región',
+					correo_representante: 'email@gmail.com'
+				}
+			];
+		} else {
+			templateData = [];
 		}
 
 		const wb = XLSX.utils.book_new();
@@ -499,20 +488,228 @@ function ThirdsHeader() {
 		handleDownloadMenuClose();
 	};
 
+	const handleExportExcel = () => {
+		const exportData = filteredThirds.map((third: ThirdType) => ({
+			'Tipo': third.third_type?.name || '',
+			'Tipo Identificación': third.typeIdentification || '',
+			'Identificación': third.identification || '',
+			'Nombres': third.name || '',
+			'Apellidos / Administrador': third.additionalName || '',
+			'Correo': third.email || '',
+			'Dirección': third.address || '',
+			'Teléfono': third.phone || '',
+			'Celular': third.mobile || '',
+			'Ciudad': third.city || '',
+			'Impacto': third.impact || '',
+			'Estado': third.status === 'active' ? 'Activo' : 'Inactivo',
+			'Clasificación': third.third_classification?.name || '',
+			'Especialidad': third.third_specialty?.name || '',
+			'Subespecialidad': third.third_sub_specialty?.name || '',
+			'Región': third.region?.name || '',
+			'Asesores': third.thirds_portfolios?.map(p => `${p.portfolio?.user?.firstName || ''} ${p.portfolio?.user?.lastName || ''}`).join(', ') || ''
+		}));
+
+		const wb = XLSX.utils.book_new();
+		const ws = XLSX.utils.json_to_sheet(exportData);
+		XLSX.utils.book_append_sheet(wb, ws, 'Paneles');
+		XLSX.writeFile(wb, 'Paneles_Exportados.xlsx');
+	};
+
 	return (
-		<div className="flex flex-col sm:flex-row space-y-16 sm:space-y-0 flex-1 w-full items-center justify-between py-32 px-24 md:px-32">
-			<motion.span
-				initial={{ x: -20 }}
-				animate={{ x: 0, transition: { delay: 0.2 } }}
-			>
-				<Typography className="text-24 md:text-32 font-extrabold tracking-tight">{t('TITLE')}</Typography>
-			</motion.span>
-			<div className="flex flex-col w-full sm:w-auto sm:flex-row space-y-16 sm:space-y-0 flex-1 items-center justify-end space-x-8">
+		<div className="flex flex-col flex-1 w-full px-24 md:px-32 py-24">
+			{/* Fila 1: Título y Botones de Acción */}
+			<div className="flex flex-col sm:flex-row space-y-16 sm:space-y-0 w-full items-center justify-between pb-24">
+				<motion.span
+					initial={{ x: -20 }}
+					animate={{ x: 0, transition: { delay: 0.2 } }}
+				>
+					<Typography className="text-24 md:text-32 font-extrabold tracking-tight">{t('TITLE')}</Typography>
+				</motion.span>
+				
+				<div className="flex flex-wrap gap-8 items-center justify-end">
+					<input
+						ref={fileInputRef}
+						type="file"
+						accept=".xlsx,.xls"
+						onChange={handleImportFileChange}
+						style={{ display: 'none' }}
+					/>
+					<motion.div
+						initial={{ opacity: 0, x: 20 }}
+						animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
+					>
+						<Button
+							variant="outlined"
+							color="primary"
+							onClick={handleExportExcel}
+							startIcon={<FuseSvgIcon>heroicons-outline:download</FuseSvgIcon>}
+						>
+							Exportar
+						</Button>
+					</motion.div>
+					{role.includes('Administrador') && (
+						<motion.div
+							initial={{ opacity: 0, x: 20 }}
+							animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
+						>
+							<Button
+								ref={downloadMenuRef}
+								variant="outlined"
+								color="primary"
+								onClick={handleDownloadMenuOpen}
+								startIcon={<FuseSvgIcon>heroicons-outline:download</FuseSvgIcon>}
+							>
+								Descargar Plantilla
+							</Button>
+							<Menu
+								anchorEl={anchorEl}
+								open={Boolean(anchorEl)}
+								onClose={handleDownloadMenuClose}
+								anchorOrigin={{
+									vertical: 'bottom',
+									horizontal: 'right'
+								}}
+								transformOrigin={{
+									vertical: 'top',
+									horizontal: 'right'
+								}}
+							>
+								<MenuItem onClick={() => generateTemplate('unificada')}>Descargar Plantilla Unificada</MenuItem>
+							</Menu>
+						</motion.div>
+					)}
+					{role.includes('Administrador') && (
+						<motion.div
+							initial={{ opacity: 0, x: 20 }}
+							animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
+						>
+							<Button
+								variant="outlined"
+								color="primary"
+								onClick={triggerImport}
+								startIcon={<FuseSvgIcon>heroicons-outline:upload</FuseSvgIcon>}
+							>
+								Importar
+							</Button>
+						</motion.div>
+					)}
+					<motion.div
+						initial={{ opacity: 0, x: 20 }}
+						animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
+					>
+						<Button
+							component={Link}
+							to="/records/thirds/new"
+							variant="contained"
+							color="secondary"
+							startIcon={<FuseSvgIcon>heroicons-outline:plus</FuseSvgIcon>}
+						>
+							Agregar
+						</Button>
+					</motion.div>
+				</div>
+			</div>
+
+			{/* Fila 2: Filtros de Búsqueda Avanzada */}
+			<div className="flex flex-row flex-wrap gap-8 items-center pt-8 pb-16">
+				<FormControl variant="outlined" size="small" className="min-w-120">
+					<InputLabel id="filter-type-label">Tipo</InputLabel>
+					<Select
+						labelId="filter-type-label"
+						value={filterType}
+						onChange={(e) => dispatch(setThirdsFilterType(e.target.value))}
+						label="Tipo"
+					>
+						<MenuItem value="all">Todos</MenuItem>
+						{thirdTypes.map((type) => (
+							<MenuItem key={type.id} value={type.name}>
+								{type.name}
+							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
+				<FormControl variant="outlined" size="small" className="min-w-120">
+					<InputLabel id="filter-status-label">Estado</InputLabel>
+					<Select
+						labelId="filter-status-label"
+						value={filterStatus}
+						onChange={(e) => dispatch(setThirdsFilterStatus(e.target.value))}
+						label="Estado"
+					>
+						<MenuItem value="all">Todos</MenuItem>
+						<MenuItem value="active">Activo</MenuItem>
+						<MenuItem value="inactive">Inactivo</MenuItem>
+					</Select>
+				</FormControl>
+				<FormControl variant="outlined" size="small" className="min-w-160">
+					<InputLabel id="filter-advisor-label">Asesor</InputLabel>
+					<Select
+						labelId="filter-advisor-label"
+						value={filterAdvisor}
+						onChange={(e) => dispatch(setThirdsFilterAdvisor(e.target.value))}
+						label="Asesor"
+					>
+						<MenuItem value="all">Todos</MenuItem>
+						{users.map((u) => (
+							<MenuItem key={u.id} value={u.id}>
+								{`${u.firstName || ''} ${u.lastName || ''}`}
+							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
+				<FormControl variant="outlined" size="small" className="min-w-120">
+					<InputLabel id="filter-region-label">Región</InputLabel>
+					<Select
+						labelId="filter-region-label"
+						value={filterRegion}
+						onChange={(e) => dispatch(setThirdsFilterRegion(e.target.value))}
+						label="Región"
+					>
+						<MenuItem value="all">Todas</MenuItem>
+						{thirdRegions.map((reg) => (
+							<MenuItem key={reg.id} value={reg.id}>
+								{reg.name}
+							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
+				<FormControl variant="outlined" size="small" className="min-w-140">
+					<InputLabel id="filter-specialty-label">Especialidad</InputLabel>
+					<Select
+						labelId="filter-specialty-label"
+						value={filterSpecialty}
+						onChange={(e) => dispatch(setThirdsFilterSpecialty(e.target.value))}
+						label="Especialidad"
+					>
+						<MenuItem value="all">Todas</MenuItem>
+						{thirdSpecialtys.map((sp) => (
+							<MenuItem key={sp.id} value={sp.id}>
+								{sp.name}
+							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
+				<FormControl variant="outlined" size="small" className="min-w-120">
+					<InputLabel id="filter-classification-label">Clasificación</InputLabel>
+					<Select
+						labelId="filter-classification-label"
+						value={filterClassification}
+						onChange={(e) => dispatch(setThirdsFilterClassification(e.target.value))}
+						label="Clasificación"
+					>
+						<MenuItem value="all">Todas</MenuItem>
+						{thirdClassifications.map((cl) => (
+							<MenuItem key={cl.id} value={cl.id}>
+								{cl.name}
+							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
 				<Paper
 					component={motion.div}
 					initial={{ y: -20, opacity: 0 }}
 					animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-					className="flex items-center w-full sm:max-w-256 space-x-8 px-16 rounded-full border-1 shadow-0"
+					className="flex items-center w-full sm:max-w-256 space-x-8 px-16 rounded-full border-1 shadow-0 h-40"
 				>
 					<FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
 
@@ -530,75 +727,6 @@ function ThirdsHeader() {
 						}}
 					/>
 				</Paper>
-				<input
-					ref={fileInputRef}
-					type="file"
-					accept=".xlsx,.xls"
-					onChange={handleImportFileChange}
-					style={{ display: 'none' }}
-				/>
-				{role.includes('Administrador') && (
-					<motion.div
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
-					>
-						<Button
-							ref={downloadMenuRef}
-							variant="outlined"
-							color="primary"
-							onClick={handleDownloadMenuOpen}
-							startIcon={<FuseSvgIcon>heroicons-outline:download</FuseSvgIcon>}
-						>
-							Descargar Plantilla
-						</Button>
-						<Menu
-							anchorEl={anchorEl}
-							open={Boolean(anchorEl)}
-							onClose={handleDownloadMenuClose}
-							anchorOrigin={{
-								vertical: 'bottom',
-								horizontal: 'right'
-							}}
-							transformOrigin={{
-								vertical: 'top',
-								horizontal: 'right'
-							}}
-						>
-							<MenuItem onClick={() => generateTemplate('medico')}>Plantilla Médico</MenuItem>
-							<MenuItem onClick={() => generateTemplate('drogeria')}>Plantilla Drogería</MenuItem>
-							<MenuItem onClick={() => generateTemplate('comercial')}>Plantilla Comercial</MenuItem>
-						</Menu>
-					</motion.div>
-				)}
-				{role.includes('Administrador') && (
-					<motion.div
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
-					>
-						<Button
-							variant="outlined"
-							color="primary"
-							onClick={triggerImport}
-							startIcon={<FuseSvgIcon>heroicons-outline:upload</FuseSvgIcon>}
-						>
-							Importar
-						</Button>
-					</motion.div>
-				)}
-				<motion.div
-					initial={{ opacity: 0, x: 20 }}
-					animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
-				>
-					<Button
-						component={Link}
-						to="/records/thirds/new"
-						variant="contained"
-						color="secondary"
-						startIcon={<FuseSvgIcon>heroicons-outline:plus</FuseSvgIcon>}
-					>
-						Agregar
-					</Button>
-				</motion.div>
 			</div>
 
 			{/* Modal de resultados de importación */}

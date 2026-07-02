@@ -30,7 +30,7 @@ function Justifications() {
 	const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
 
 	useDeepCompareEffect(() => {
-		dispatch(getJustifications());
+		dispatch(getJustifications({}));
 	}, [dispatch]);
 
 	useEffect(() => {

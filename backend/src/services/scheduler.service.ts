@@ -4,7 +4,7 @@ import logger from '../utils/logger';
 import { closeMonthLogic } from './closeMonth.service';
 import { processBirthdays } from './birthday.service';
 
-const CHECK_INTERVAL_MS = 60 * 60 * 1000; // Ejecutar verificación cada hora
+import cron from 'node-cron';
 
 /**
  * Inicia el planificador de tareas en segundo plano
@@ -12,9 +12,14 @@ const CHECK_INTERVAL_MS = 60 * 60 * 1000; // Ejecutar verificación cada hora
 export const startScheduler = () => {
   logger.info('[Scheduler] Iniciando demonio de tareas programadas...');
 
-  // Ejecución inmediata al iniciar y luego programada cada hora
+  // Ejecución inmediata al iniciar
   runSchedulerChecks();
-  setInterval(runSchedulerChecks, CHECK_INTERVAL_MS);
+  
+  // Programar para todos los días a las 8:00 AM
+  cron.schedule('0 8 * * *', () => {
+    logger.info('[Scheduler] Ejecutando tarea programada de las 8:00 AM');
+    runSchedulerChecks();
+  });
 };
 
 const runSchedulerChecks = async () => {

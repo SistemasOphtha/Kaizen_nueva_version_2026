@@ -32,7 +32,7 @@ const getManagedUserIds = async (userId: number, rol: string): Promise<number[]>
  * @param {string} rol - Rol del usuario
  * @returns {Promise<Array>} - Lista de terceros
  */
-const getUndervisitedThirdsLastMonth = async (userId, rol) => {
+const getUndervisitedThirdsLastMonth = async (userId, rol, filters: any = {}) => {
   const today = new Date();
   
   // Calcular fechas del mes anterior
@@ -57,12 +57,46 @@ const getUndervisitedThirdsLastMonth = async (userId, rol) => {
     const userIds = await getManagedUserIds(userId, rol);
     query += ` AND tp."portfolioId" IN (SELECT id FROM "portfolios" WHERE "userId" IN (?))`;
     replacements.push(userIds);
+  } else {
+    // Si es admin, puede filtrar por usuario especifico
+    if (filters.userId && filters.userId != '0' && filters.userId !== '') {
+      query += ` AND tp."portfolioId" IN (SELECT id FROM "portfolios" WHERE "userId" = ?)`;
+      replacements.push(filters.userId);
+    }
   }
   
   query += `)
     AND NOT EXISTS (SELECT 1 FROM "justifications" j WHERE j."thirdId" = t.id AND j."dateToJustify" BETWEEN ? AND ?)
     AND t."createdAt" < ?
   `;
+  
+  if (filters.regionId && filters.regionId != '0' && filters.regionId !== '') {
+    query += ` AND t."regionId" = ?`;
+    replacements.push(filters.regionId);
+  }
+  
+  if (filters.type && filters.type != '0' && filters.type !== '') {
+    query += ` AND t."typeId" = ?`;
+    replacements.push(filters.type);
+  }
+
+  if (filters.identification && filters.identification !== '') {
+    query += ` AND t."identification" ILIKE ?`;
+    replacements.push(`%${filters.identification}%`);
+  }
+
+  if (filters.name && filters.name !== '') {
+    query += ` AND t."name" ILIKE ?`;
+    replacements.push(`%${filters.name}%`);
+  }
+
+  if (filters.status && filters.status !== '') {
+    if (filters.status === 'activo') {
+      query += ` AND t."state" = true`;
+    } else if (filters.status === 'inactivo') {
+      query += ` AND t."state" = false`;
+    }
+  }
   
   replacements.push(firstDayOfLastMonth, lastDayOfLastMonth, firstDayOfCurrentMonth);
   
@@ -86,7 +120,7 @@ const getUndervisitedThirdsLastMonth = async (userId, rol) => {
  * @param {string} rol - Rol del usuario
  * @returns {Promise<Array>} - Lista de terceros
  */
-const getUndervisitedThirdsCurrentMonth = async (userId, rol) => {
+const getUndervisitedThirdsCurrentMonth = async (userId, rol, filters: any = {}) => {
   const today = new Date();
   
   // Calcular fechas del mes actual
@@ -110,9 +144,43 @@ const getUndervisitedThirdsCurrentMonth = async (userId, rol) => {
     const userIds = await getManagedUserIds(userId, rol);
     query += ` AND tp."portfolioId" IN (SELECT id FROM "portfolios" WHERE "userId" IN (?))`;
     replacements.push(userIds);
+  } else {
+    // Si es admin, puede filtrar por usuario especifico
+    if (filters.userId && filters.userId != '0' && filters.userId !== '') {
+      query += ` AND tp."portfolioId" IN (SELECT id FROM "portfolios" WHERE "userId" = ?)`;
+      replacements.push(filters.userId);
+    }
   }
   
   query += `)`;
+  
+  if (filters.regionId && filters.regionId != '0' && filters.regionId !== '') {
+    query += ` AND t."regionId" = ?`;
+    replacements.push(filters.regionId);
+  }
+  
+  if (filters.type && filters.type != '0' && filters.type !== '') {
+    query += ` AND t."typeId" = ?`;
+    replacements.push(filters.type);
+  }
+
+  if (filters.identification && filters.identification !== '') {
+    query += ` AND t."identification" ILIKE ?`;
+    replacements.push(`%${filters.identification}%`);
+  }
+
+  if (filters.name && filters.name !== '') {
+    query += ` AND t."name" ILIKE ?`;
+    replacements.push(`%${filters.name}%`);
+  }
+
+  if (filters.status && filters.status !== '') {
+    if (filters.status === 'activo') {
+      query += ` AND t."state" = true`;
+    } else if (filters.status === 'inactivo') {
+      query += ` AND t."state" = false`;
+    }
+  }
   
   try {
     const results = await dbConection.query(query, {
@@ -310,11 +378,11 @@ const getImpactsByType = async (filter) => {
  * @param {string} rol - Rol del usuario
  * @returns {Promise<object>} - Datos para widgets
  */
-const getTrackingAlertData = async (userId, rol) => {
+const getTrackingAlertData = async (userId, rol, filters: any = {}) => {
   try {
     // Obtener terceros no visitados suficientemente
-    const thirdNotVisitLastMonth = await getUndervisitedThirdsLastMonth(userId, rol);
-    const thirdNotVisitCurrentMonth = await getUndervisitedThirdsCurrentMonth(userId, rol);
+    const thirdNotVisitLastMonth = await getUndervisitedThirdsLastMonth(userId, rol, filters);
+    const thirdNotVisitCurrentMonth = await getUndervisitedThirdsCurrentMonth(userId, rol, filters);
     
     // Formatear datos para widgets
     const tableThirdNotVisitLastMonth = {

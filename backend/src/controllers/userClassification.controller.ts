@@ -3,7 +3,8 @@ import UserClassification from '../models/UserClassification';
 const createClassification = async (req: any, res: any) => {
   const {
     name,
-    status
+    status,
+    permissions
   } = req.body;
 
   const classificationFound = await UserClassification.findOne({ where: { name } });
@@ -15,7 +16,8 @@ const createClassification = async (req: any, res: any) => {
   try {
     const newClassification = await UserClassification.create({
       name,
-      status
+      status,
+      permissions
     });
 
     // const classification = await UserClassification.findByPk(newClassification.dataValues.id);

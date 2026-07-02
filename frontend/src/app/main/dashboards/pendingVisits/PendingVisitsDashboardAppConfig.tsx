@@ -7,6 +7,12 @@ const PendingVisitsDashboardApp = lazyWithReducer(
 	reducer
 );
 
+const PendingJustificationsDashboardApp = lazyWithReducer(
+	'pendingJustificationsDashboardApp',
+	() => import('./PendingJustificationsDashboardApp'),
+	reducer
+);
+
 /**
  * The pendingVisits dashboard app config.
  */
@@ -20,6 +26,10 @@ const PendingVisitsDashboardAppConfig = {
 		{
 			path: 'dashboards/pending-visits',
 			element: <PendingVisitsDashboardApp />
+		},
+		{
+			path: 'dashboards/pending-justifications',
+			element: <PendingJustificationsDashboardApp />
 		}
 	]
 };

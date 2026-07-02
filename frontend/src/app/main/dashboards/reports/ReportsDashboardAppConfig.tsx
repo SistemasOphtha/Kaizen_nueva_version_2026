@@ -1,5 +1,6 @@
 import lazyWithReducer from 'app/store/lazyWithReducer';
 import reducer from './store';
+import authRoles from '../../../auth/authRoles';
 
 const ReportsDashboardApp = lazyWithReducer('reportsDashboardApp', () => import('./ReportsDashboardApp'), reducer);
 
@@ -12,6 +13,7 @@ const ReportsDashboardAppConfig = {
 			config: {}
 		}
 	},
+	auth: authRoles.admin,
 	routes: [
 		{
 			path: 'dashboards/reports',

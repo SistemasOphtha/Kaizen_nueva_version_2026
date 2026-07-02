@@ -77,7 +77,15 @@ function ProductsTable(props: ProductsTableProps) {
 
 	useEffect(() => {
 		if (searchText.length !== 0) {
-			setData(_.filter(workplans, (item) => item.description.toLowerCase().includes(searchText.toLowerCase())));
+			const s = searchText.toLowerCase();
+			setData(
+				_.filter(workplans, (item) => {
+					const desc = item.description?.toLowerCase() || '';
+					const userName = `${item.user?.firstName || ''} ${item.user?.lastName || ''}`.toLowerCase();
+					
+					return desc.includes(s) || userName.includes(s);
+				}) as WorkplanType[]
+			);
 			setPage(0);
 		} else {
 			setData(workplans);
@@ -169,14 +177,14 @@ function ProductsTable(props: ProductsTableProps) {
 			return;
 		}
 
-		const filterBase64 = Buffer.from(
+		const filterBase64 = btoa(
 			JSON.stringify({
 				region,
 				user,
 				startDate: startDateForm.toISOString(),
 				endDate: endDateForm.toISOString()
 			})
-		).toString('base64');
+		);
 
 		dispatch(
 			getWorkplansForRangeDate({
@@ -353,57 +361,37 @@ function ProductsTable(props: ProductsTableProps) {
 							))}
 						</Select>
 					</FormControl>
-					{/* <FormControl sx={{ minWidth: 180 }}>
-						<InputLabel id="demo-select-small-label">Usuario</InputLabel>
-						<Select
-							labelId="demo-select-small-label"
-							id="demo-select-small"
-							value={user}
-							label="Usuario"
-							onChange={(e) => setUser(Number(e.target.value))}
-						>
-							<MenuItem value="0">
-								<em>Todos</em>
-							</MenuItem>
-							{users.map((user) => (
-								<MenuItem
-									key={user.id}
-									value={user.id}
-								>
-									{user.firstName} {user.lastName} - {user.region?.name}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl> */}
-					<FormControl sx={{ minWidth: 180 }}>
-						<Autocomplete
-							disablePortal
-							options={users}
-							sx={{ width: 300 }}
-							onChange={(e, value) => setUser(value?.id || 0)}
-							getOptionLabel={(option) =>
-								`${option.firstName} ${option.lastName} - ${option.region?.name}`
-							}
-							renderOption={(props, option) => {
-								const { ...optionProps } = props;
-								return (
-									<Box
-										key={option.id}
-										component="li"
-										{...optionProps}
-									>
-										{option.firstName} {option.lastName} - {option.region?.name}
-									</Box>
-								);
-							}}
-							renderInput={(params) => (
-								<TextField
-									{...params}
-									label="Usuario"
-								/>
-							)}
-						/>
-					</FormControl>
+					{users && users.length > 0 && (
+						<FormControl sx={{ minWidth: 180 }}>
+							<Autocomplete
+								disablePortal
+								options={users}
+								sx={{ width: 300 }}
+								onChange={(e, value) => setUser(value?.id || 0)}
+								getOptionLabel={(option) =>
+									`${option.firstName} ${option.lastName} - ${option.region?.name}`
+								}
+								renderOption={(props, option) => {
+									const { ...optionProps } = props;
+									return (
+										<Box
+											key={option.id}
+											component="li"
+											{...optionProps}
+										>
+											{option.firstName} {option.lastName} - {option.region?.name}
+										</Box>
+									);
+								}}
+								renderInput={(params) => (
+									<TextField
+										{...params}
+										label="Usuario"
+									/>
+								)}
+							/>
+						</FormControl>
+					)}
 					<Button
 						variant="contained"
 						color="secondary"
@@ -511,6 +499,19 @@ function ProductsTable(props: ProductsTableProps) {
 											{format(new Date(n.endDate), 'dd/MM/yyyy hh:mm a')}
 										</TableCell>
 										<TableCell align="left">{n.description}</TableCell>
+										<TableCell align="left">
+											{n.typeEvent && (
+												<span
+													className={`inline-block px-8 py-4 rounded-full text-12 font-bold ${
+														n.typeEvent.name.toLowerCase().includes('justifica')
+															? 'bg-red-100 text-red-800'
+															: 'bg-green-100 text-green-800'
+													}`}
+												>
+													{n.typeEvent.name}
+												</span>
+											)}
+										</TableCell>
 									</TableRow>
 								);
 							})}

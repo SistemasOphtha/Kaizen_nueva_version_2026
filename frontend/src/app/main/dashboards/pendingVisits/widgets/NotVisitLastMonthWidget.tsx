@@ -12,15 +12,18 @@ import TableFooter from '@mui/material/TableFooter';
 import TablePagination from '@mui/material/TablePagination';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { memo, useState } from 'react';
-import clsx from 'clsx';
-import { Link } from 'react-router-dom';
-import Button from '@mui/material/Button';
-import { useAppSelector } from 'app/store';
+import { useAppSelector, useAppDispatch } from 'app/store';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { selectUser } from 'app/store/user/userSlice';
-import { selectWidgets } from '../store/widgetsSlice';
+import { selectWidgets, getWidgets } from '../store/widgetsSlice';
 import ThirdNotVisitLastMonthWidgetType from '../types/ThirdNotVisitLastMonthWidgetType';
+import FilterThirdForm from '../../reports/components/FilterThirdForm';
+import * as XLSX from 'xlsx';
+import InputBase from '@mui/material/InputBase';
+import { useState, useEffect, memo } from 'react';
+import Button from '@mui/material/Button';
+import clsx from 'clsx';
+import { Link } from 'react-router-dom';
 
 /**
  * The NotVisitLastMonthWidget widget.
@@ -153,21 +156,36 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
 
 function NotVisitLastMonthWidget() {
 	const widgets = useAppSelector(selectWidgets);
+	const dispatch = useAppDispatch();
 	const user = useAppSelector(selectUser);
 	const { columns, rows } = widgets.thirdNotVisitLastMonth as ThirdNotVisitLastMonthWidgetType;
 
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
-	const [filterData, setFilterData] = useState<string>('');
+	const [searchText, setSearchText] = useState('');
+	const [loadingFilters, setLoadingFilters] = useState(false);
+
+	const handleFilter = (type: number, identification: string, name: string, region: number, status: string, userId: number) => {
+		dispatch(getWidgets({
+			type,
+			identification,
+			name,
+			regionId: region,
+			status,
+			userId
+		})).then(() => {
+			setLoadingFilters(false);
+		});
+	};
 
 	// Avoid a layout jump when reaching the last page with empty rows.
 	const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
 	// Filtra las filas basadas en el filtro antes de aplicar la paginación
-	const filteredRows = rows.filter((row) => {
+	const filteredRows = rows.filter((row: any) => {
 		return (
-			row.name.toLowerCase().includes(filterData.toLowerCase()) ||
-			row.identification.toLowerCase().includes(filterData.toLowerCase())
+			row.name.toLowerCase().includes(searchText.toLowerCase()) ||
+			row.identification.toLowerCase().includes(searchText.toLowerCase())
 		);
 	});
 	const paginatedRows = filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -188,30 +206,60 @@ function NotVisitLastMonthWidget() {
 		return false;
 	};
 
+	const handleExport = () => {
+		const dataToExport = filteredRows.map((row: any) => ({
+			"ID": row.id,
+			"Panel": row.name,
+			"Identificación": row.identification,
+			"Visitas Requeridas": row.impact,
+			"Visitas Realizadas": row.visit_count,
+			"Porcentaje de Cumplimiento": ((row.visit_count / row.impact) * 100).toFixed(2) + "%"
+		}));
+		const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, "Justificaciones_Pendientes");
+		XLSX.writeFile(workbook, "Justificaciones_Pendientes_Mes_Pasado.xlsx");
+	};
+
 	return (
 		<Paper className="flex flex-col flex-auto p-24 shadow rounded-2xl overflow-hidden">
-			<div>
-				<Typography className="mr-16 text-lg font-medium tracking-tight leading-6 truncate">
-					Justificaciones
-				</Typography>
-				<Typography
-					className="font-medium"
-					color="text.secondary"
-				>
-					Lista de terceros que faltaron por completar las visitas del mes pasado.
-				</Typography>
+			<div className="flex flex-1 items-center justify-between p-8 sm:p-24 pb-0">
+				<div className="flex flex-col">
+					<Typography className="mr-16 text-xl font-semibold tracking-tight leading-6 truncate">
+						Justificaciones Pendientes
+					</Typography>
+					<Typography className="font-medium" color="text.secondary">
+						Lista de terceros que faltaron por visitar el mes pasado.
+					</Typography>
+				</div>
+				<div className="flex gap-16">
+					<Paper className="flex items-center w-full sm:max-w-256 space-x-8 px-16 rounded-full border-1 shadow-0">
+						<FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
+						<InputBase
+							placeholder="Buscar"
+							className="flex flex-1"
+							value={searchText}
+							inputProps={{ 'aria-label': 'Search' }}
+							onChange={(ev) => setSearchText(ev.target.value)}
+						/>
+					</Paper>
+					<Button
+						variant="contained"
+						color="primary"
+						onClick={handleExport}
+						startIcon={<FuseSvgIcon>heroicons-outline:download</FuseSvgIcon>}
+					>
+						Exportar a Excel
+					</Button>
+				</div>
 			</div>
+
+			{isAdmin() && (
+				<FilterThirdForm onFilter={handleFilter} setLoading={setLoadingFilters} />
+			)}
 
 			<TableContainer component={Paper}>
 				<div className="table-responsive mt-24">
-					<div className="p-10 m-5">
-						<TextField
-							label="Filtrar"
-							variant="outlined"
-							value={filterData}
-							onChange={(e) => setFilterData(e.target.value)}
-						/>
-					</div>
 					<Table className="simple w-full min-w-full">
 						<TableHead>
 							<TableRow>

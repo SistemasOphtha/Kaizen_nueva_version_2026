@@ -17,10 +17,11 @@ const trackingAlert = async (req: any, res: any) => {
   try {
     const userId = req.userId;
     const rol = req.rol;
+    const filters = req.query;
     
-    logger.debug(`Obteniendo datos de alertas de seguimiento para usuario: ${userId}, rol: ${rol}`);
+    logger.debug(`Obteniendo datos de alertas de seguimiento para usuario: ${userId}, rol: ${rol} con filtros: ${JSON.stringify(filters)}`);
     
-    const widgets = await widgetService.getTrackingAlertData(userId, rol);
+    const widgets = await widgetService.getTrackingAlertData(userId, rol, filters);
     
     logger.info(`Datos de alertas de seguimiento obtenidos correctamente`);
     return res.status(200).json(widgets);

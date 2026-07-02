@@ -6,78 +6,55 @@ import es from './navigation-i18n/es';
 i18next.addResourceBundle('en', 'navigation', en);
 i18next.addResourceBundle('es', 'navigation', es);
 
+import authRoles from '../auth/authRoles';
+
 /**
  * The navigationConfig object is an array of navigation items for the Fuse application.
  */
 const navigationConfig: FuseNavigationType = [
-	// {
-	// 	id: 'home-component',
-	// 	title: 'Home',
-	// 	translate: 'HOME',
-	// 	type: 'item',
-	// 	icon: 'heroicons-outline:home',
-	// 	url: '/'
-	// },
 	{
-		id: 'dashboards',
-		title: 'Dashboards',
-		translate: 'DASHBOARDS',
+		id: 'pendientes',
+		title: 'Pendientes',
+		translate: 'PENDIENTES',
 		type: 'group',
-		icon: 'heroicons-outline:chart-pie',
+		icon: 'heroicons-outline:clipboard-list',
 		children: [
-			// {
-			// 	id: 'project-component',
-			// 	title: 'Project',
-			// 	translate: 'PROJECT',
-			// 	type: 'item',
-			// 	icon: 'heroicons-outline:chart-pie',
-			// 	url: '/dashboards/project'
-			// },
 			{
-				id: 'indicators-component',
-				title: 'Indicators',
-				translate: 'INDICATORS',
+				id: 'workplans-component',
+				title: 'Plan de Trabajo',
+				translate: 'WORKPLANS',
 				type: 'item',
-				icon: 'heroicons-outline:clipboard-check',
-				url: '/dashboards/indicators'
+				icon: 'heroicons-outline:calendar',
+				url: '/dashboards/workplans'
 			},
 			{
 				id: 'pendingVisits-component',
-				title: 'Pending Visits',
-				translate: 'PENDING_VISITS',
+				title: 'Visitas',
+				translate: 'VISITS',
 				type: 'item',
 				icon: 'heroicons-outline:chart-pie',
 				url: '/dashboards/pending-visits'
 			},
 			{
-				id: 'reports-component',
-				title: 'Reports',
-				translate: 'REPORTS',
+				id: 'justifications-component',
+				title: 'Justificaciones',
+				translate: 'JUSTIFICATIONS',
 				type: 'item',
-				icon: 'heroicons-outline:document-report',
-				url: '/dashboards/reports'
-			},
-			{
-				id: 'workplans-component',
-				title: 'Workplans',
-				translate: 'WORKPLANS',
-				type: 'item',
-				icon: 'heroicons-outline:calendar',
-				url: '/dashboards/workplans'
+				icon: 'heroicons-outline:clipboard-check',
+				url: '/dashboards/pending-justifications'
 			}
 		]
 	},
 	{
-		id: 'apps',
-		title: 'Applications',
-		subtitle: '',
+		id: 'consultas',
+		title: 'Consultas',
+		translate: 'CONSULTAS',
 		type: 'group',
-		icon: 'heroicons-outline:cube',
-		translate: 'APPLICATIONS',
+		icon: 'heroicons-outline:search',
 		children: [
 			{
 				id: 'calendar-component',
-				title: 'Calendar',
+				title: 'Calendario',
 				translate: 'CALENDAR',
 				type: 'item',
 				icon: 'heroicons-outline:calendar',
@@ -85,27 +62,55 @@ const navigationConfig: FuseNavigationType = [
 			},
 			{
 				id: 'visits-component',
-				title: 'Visits',
-				translate: 'VISITS',
+				title: 'Visitas y Justificaciones',
+				translate: 'VISITS_AND_JUSTIFICATIONS',
 				type: 'item',
 				icon: 'heroicons-outline:information-circle',
 				url: '/apps/visits'
-			},
-			// {
-			// 	id: 'workplans-component',
-			// 	title: 'Workplans',
-			// 	translate: 'WORKPLANS',
-			// 	type: 'item',
-			// 	icon: 'heroicons-outline:calendar',
-			// 	url: '/apps/workplans'
-			// },
+			}
+		]
+	},
+	{
+		id: 'indicadores-reportes',
+		title: 'Indicadores y Reportes',
+		translate: 'INDICATORS_REPORTS',
+		type: 'group',
+		auth: authRoles.adminAndCoordinator,
+		icon: 'heroicons-outline:chart-bar',
+		children: [
 			{
-				id: 'justifications-component',
-				title: 'Justifications',
-				translate: 'JUSTIFICATIONS',
+				id: 'indicators-component',
+				title: 'Indicadores',
+				translate: 'INDICATORS',
 				type: 'item',
 				icon: 'heroicons-outline:clipboard-check',
-				url: '/apps/justifications'
+				url: '/dashboards/indicators'
+			},
+			{
+				id: 'reports-component',
+				title: 'Reportes',
+				translate: 'REPORTS',
+				type: 'item',
+				icon: 'heroicons-outline:document-report',
+				url: '/dashboards/reports'
+			}
+		]
+	},
+	{
+		id: 'comunicaciones',
+		title: 'Comunicaciones',
+		translate: 'COMMUNICATIONS',
+		type: 'group',
+		auth: authRoles.admin,
+		icon: 'heroicons-outline:mail',
+		children: [
+			{
+				id: 'birthday-emails-component',
+				title: 'Correos de Cumpleaños',
+				translate: 'BIRTHDAY_EMAILS',
+				type: 'item',
+				icon: 'heroicons-outline:cake',
+				url: '/communications/birthdays'
 			}
 		]
 	},
@@ -114,6 +119,7 @@ const navigationConfig: FuseNavigationType = [
 		title: 'Records',
 		subtitle: '',
 		type: 'group',
+		auth: authRoles.admin,
 		icon: 'heroicons-outline:document',
 		translate: 'RECORDS',
 		children: [

@@ -170,16 +170,13 @@ function SignInPage() {
 		<div className="flex min-w-0 flex-1 flex-col items-center sm:flex-row sm:justify-center md:items-start md:justify-start">
 			<Paper className="h-full w-full px-16 py-8 ltr:border-r-1 rtl:border-l-1 sm:h-auto sm:w-auto sm:rounded-2xl sm:p-48 sm:shadow md:flex md:h-full md:w-1/2 md:items-center md:justify-end md:rounded-none md:p-64 md:shadow-none">
 				<div className="mx-auto w-full max-w-320 sm:mx-0 sm:w-320">
-					<div className="flex justify-center w-full mb-16">
-						<img
-							className="rounded-lg"
-							src="assets/images/logo/ophtha.jpg"
-							alt="logo"
-							style={{ width: '160px', height: 'auto' }}
-						/>
-					</div>
+					<img
+						className="w-56 rounded-lg"
+						src="assets/images/logo/ophtha.jpg"
+						alt="logo"
+					/>
 
-					<Typography className="mt-32 text-center text-4xl font-extrabold leading-tight tracking-tight">
+					<Typography className="mt-32 text-4xl font-extrabold leading-tight tracking-tight">
 						{require2FA ? 'Verificación 2FA' : 'Iniciar sesión'}
 					</Typography>
 
@@ -320,12 +317,6 @@ function SignInPage() {
 										</Typography>
 									)}
 								</div>
-							)}
-
-							{errors?.root && (
-								<Typography color="error" className="text-12 mt-16 font-semibold text-center">
-									{errors.root.message}
-								</Typography>
 							)}
 
 							<Button

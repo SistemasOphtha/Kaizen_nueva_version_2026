@@ -11,7 +11,7 @@ type QuickPanelToggleButtonProps = {
  * The quick panel toggle button.
  */
 function QuickPanelToggleButton(props: QuickPanelToggleButtonProps) {
-	const { children = <FuseSvgIcon>heroicons-outline:bookmark</FuseSvgIcon> } = props;
+	return null;
 	const dispatch = useAppDispatch();
 
 	return (

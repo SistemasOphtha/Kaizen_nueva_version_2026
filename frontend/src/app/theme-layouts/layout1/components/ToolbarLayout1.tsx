@@ -11,12 +11,12 @@ import { Layout1ConfigDefaultsType } from 'app/theme-layouts/layout1/Layout1Conf
 import AdjustFontSize from '../../shared-components/AdjustFontSize';
 import FullScreenToggle from '../../shared-components/FullScreenToggle';
 import LanguageSwitcher from '../../shared-components/LanguageSwitcher';
-import NotificationPanelToggleButton from '../../shared-components/notificationPanel/NotificationPanelToggleButton';
+// import NotificationPanelToggleButton from '../../shared-components/notificationPanel/NotificationPanelToggleButton';
 import NavigationShortcuts from '../../shared-components/NavigationShortcuts';
 import NavigationSearch from '../../shared-components/NavigationSearch';
 import NavbarToggleButton from '../../shared-components/NavbarToggleButton';
 import UserMenu from '../../shared-components/UserMenu';
-import QuickPanelToggleButton from '../../shared-components/quickPanel/QuickPanelToggleButton';
+// import QuickPanelToggleButton from '../../shared-components/quickPanel/QuickPanelToggleButton';
 
 type ToolbarLayout1Props = {
 	className?: string;
@@ -75,8 +75,8 @@ function ToolbarLayout1(props: ToolbarLayout1Props) {
 						<AdjustFontSize />
 						<FullScreenToggle />
 						<NavigationSearch />
-						<QuickPanelToggleButton />
-						<NotificationPanelToggleButton />
+						{/* <QuickPanelToggleButton /> */}
+						{/* <NotificationPanelToggleButton /> */}
 						<UserMenu />
 					</div>
 

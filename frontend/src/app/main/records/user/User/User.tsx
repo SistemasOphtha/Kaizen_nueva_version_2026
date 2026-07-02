@@ -24,6 +24,8 @@ import UserHeader from './UserHeader';
 import BasicInfoTab from './tabs/BasicInfoTab';
 import AdditionalInfoTab from './tabs/AdditionalInfoTab';
 import PortfolioInfoTab from './tabs/PortfolioInfoTab';
+import SecurityTab from './tabs/SecurityTab';
+import { selectUser as selectAuthUser } from 'app/store/user/userSlice';
 
 /**
 
@@ -37,6 +39,7 @@ const schema = yup.object().shape({});
 function User() {
 	const dispatch = useAppDispatch();
 	const { data: user, status } = useAppSelector(selectUser);
+	const authUser = useAppSelector(selectAuthUser);
 	const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
 
 	const routeParams = useParams();
@@ -173,6 +176,12 @@ function User() {
 								className="h-64"
 								label="Portafolios"
 							/>
+							{authUser.role.includes('Administrador') && (
+								<Tab
+									className="h-64"
+									label="Seguridad"
+								/>
+							)}
 						</Tabs>
 						<div className="p-16 sm:p-24 max-w-3xl">
 							<div className={tabValue !== 0 ? 'hidden' : ''}>
@@ -184,6 +193,11 @@ function User() {
 							<div className={tabValue !== 2 ? 'hidden' : ''}>
 								<PortfolioInfoTab />
 							</div>
+							{authUser.role.includes('Administrador') && (
+								<div className={tabValue !== 3 ? 'hidden' : ''}>
+									<SecurityTab />
+								</div>
+							)}
 						</div>
 					</>
 				}

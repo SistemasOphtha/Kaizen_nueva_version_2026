@@ -123,6 +123,15 @@ const signinHandler = async (req: any, res: any) => {
       }
     );
 
+    if (userFound.status === 'inactive') {
+      return res.status(200).json({
+        error: [{
+          type: "email",
+          message: "Su cuenta se encuentra inactiva. Contacte al administrador."
+        }]
+      });
+    }
+
     const matchPassword = await User.prototype.comparePassword(
       password,
       userFound.password
@@ -245,6 +254,10 @@ const signinforTokenHandler = async (req: any, res: any) => {
     );
 
     if (!userFound) return res.status(400).json({ token: null, message: "User Not Found" });
+
+    if (userFound.status === 'inactive') {
+      return res.status(401).json({ message: "Su cuenta se encuentra inactiva. Contacte al administrador." });
+    }
 
     // Log or restore the sign in session
     const activeLog = await SessionLog.findOne({
@@ -555,6 +568,15 @@ const loginVerify2FA = async (req: any, res: any) => {
 
     if (!userFound) {
       return res.status(400).json({ message: 'Usuario no encontrado' });
+    }
+
+    if (userFound.status === 'inactive') {
+      return res.status(200).json({
+        error: [{
+          type: "email",
+          message: "Su cuenta se encuentra inactiva. Contacte al administrador."
+        }]
+      });
     }
 
     const method = userFound.twoFactorMethod || 'totp';

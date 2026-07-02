@@ -9,9 +9,7 @@ import PendingVisitsDashboardAppHeader from './PendingVisitsDashboardAppHeader';
 // import PreviousStatementWidget from './widgets/PreviousStatementWidget';
 // import CurrentStatementWidget from './widgets/CurrentStatementWidget';
 // import AccountBalanceWidget from './widgets/AccountBalanceWidget';
-import NotVisitLastMonthWidget from './widgets/NotVisitLastMonthWidget';
 import NotVisitCurrentMonthWidget from './widgets/NotVisitCurrentMonthWidget';
-// import BudgetWidget from './widgets/BudgetWidget';
 
 /**
  * The pendingVisits dashboard app.
@@ -22,7 +20,7 @@ function PendingVisitsDashboardApp() {
 	const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
 
 	useEffect(() => {
-		dispatch(getWidgets());
+		dispatch(getWidgets({}));
 	}, [dispatch]);
 
 	const content = (
@@ -49,39 +47,10 @@ function PendingVisitsDashboardApp() {
 							initial="hidden"
 							animate="show"
 						>
-							{/* <div className="grid grid-cols-1 xl:grid-cols-2 gap-32 w-full mt-32">
-								<div className="grid gap-32 sm:grid-flow-col xl:grid-flow-row">
-									<motion.div
-										variants={item}
-										className="flex flex-col flex-auto"
-									>
-										<PreviousStatementWidget />
-									</motion.div>
-
-									<motion.div
-										variants={item}
-										className="flex flex-col flex-auto"
-									>
-										<CurrentStatementWidget />
-									</motion.div>
-								</div>
+							<div className="grid grid-cols-1 gap-32 w-full mt-32">
 								<motion.div
 									variants={item}
 									className="flex flex-col flex-auto"
-								>
-									<AccountBalanceWidget />
-								</motion.div>
-							</div> */}
-							<div className="grid grid-cols-1 xl:grid-cols-3 gap-32 w-full mt-32">
-								<motion.div
-									variants={item}
-									className="xl:col-span-2 flex flex-col flex-auto"
-								>
-									<NotVisitLastMonthWidget />
-								</motion.div>
-								<motion.div
-									variants={item}
-									className="xl:col-span-2 flex flex-col flex-auto"
 								>
 									<NotVisitCurrentMonthWidget />
 								</motion.div>

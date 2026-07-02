@@ -7,7 +7,8 @@ import { useParams } from 'react-router-dom';
 import Autocomplete from '@mui/material/Autocomplete';
 import MenuItem from '@mui/material/MenuItem';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { useSpeechToText } from '../../../../../hooks/useSpeechToText';
 import { selectUser } from 'app/store/user/userSlice';
 import { selectThirds } from '../../../../records/third/store/thirdsSlice';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -27,58 +28,7 @@ function BasicInfoTab() {
 	const { dateToJustify, userId, date } = watch() as { dateToJustify: string; userId: number; date: string };
 
 	const [isBlocked, setIsBlocked] = useState<boolean>(false);
-	const [listeningField, setListeningField] = useState<string | null>(null);
-	const recognitionRef = useRef<any>(null);
-
-	const toggleListening = (fieldName: string, onChange: (val: string) => void, currentValue: string) => {
-		const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-		
-		if (!SpeechRecognition) {
-			alert('El reconocimiento de voz no está soportado en este navegador. Por favor use Google Chrome.');
-			return;
-		}
-
-		if (listeningField === fieldName) {
-			if (recognitionRef.current) {
-				recognitionRef.current.stop();
-			}
-			setListeningField(null);
-		} else {
-			if (recognitionRef.current) {
-				recognitionRef.current.stop();
-			}
-
-			const recognition = new SpeechRecognition();
-			recognition.continuous = true;
-			recognition.interimResults = false;
-			recognition.lang = 'es-ES';
-
-			recognition.onstart = () => {
-				setListeningField(fieldName);
-			};
-
-			recognition.onresult = (event: any) => {
-				const transcript = event.results[event.results.length - 1][0].transcript;
-				const newVal = currentValue ? `${currentValue} ${transcript}` : transcript;
-				onChange(newVal);
-			};
-
-			recognition.onerror = (event: any) => {
-				console.error('Speech recognition error:', event.error);
-				if (recognitionRef.current) {
-					recognitionRef.current.stop();
-				}
-				setListeningField(null);
-			};
-
-			recognition.onend = () => {
-				setListeningField(null);
-			};
-
-			recognitionRef.current = recognition;
-			recognition.start();
-		}
-	};
+	const { isListening, toggleListening } = useSpeechToText('description');
 
 	useEffect(() => {
 		if (routeParams.thirdId) {
@@ -199,13 +149,13 @@ function BasicInfoTab() {
 							endAdornment: (
 								<InputAdornment position="end" className="self-start mt-8">
 									<IconButton
-										onClick={() => toggleListening('description', field.onChange, field.value as string)}
-										color={listeningField === 'description' ? 'error' : 'default'}
-										title={listeningField === 'description' ? 'Detener dictado' : 'Dictar por voz'}
+										onClick={toggleListening}
+										color={isListening ? 'error' : 'default'}
+										title={isListening ? 'Detener dictado' : 'Dictar por voz'}
 										disabled={!isBlocked}
 									>
 										<FuseSvgIcon size={20}>
-											{listeningField === 'description' ? 'heroicons-solid:microphone' : 'heroicons-outline:microphone'}
+											{isListening ? 'heroicons-solid:microphone' : 'heroicons-outline:microphone'}
 										</FuseSvgIcon>
 									</IconButton>
 								</InputAdornment>

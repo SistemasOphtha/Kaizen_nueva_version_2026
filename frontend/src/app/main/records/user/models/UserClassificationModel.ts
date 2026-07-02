@@ -10,6 +10,7 @@ const UserClassificationModel = (data: PartialDeep<UserClassificationType>): Use
 		id: 0,
 		name: '',
 		status: '',
+		permissions: {},
 		createdAt: '',
 		updatedAt: ''
 	});

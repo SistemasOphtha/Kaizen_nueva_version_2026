@@ -8,10 +8,11 @@ import Autocomplete from '@mui/material/Autocomplete';
 import MenuItem from '@mui/material/MenuItem';
 import { Controller, useFormContext } from 'react-hook-form';
 import { selectUser } from 'app/store/user/userSlice';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { useParams } from 'react-router-dom';
+import { useSpeechToText } from '../../../../../hooks/useSpeechToText';
 import { selectTypeEvents } from '../../store/typeEventsSlice';
 import { WorkplanType } from '../../types/WorkplanType';
 
@@ -29,41 +30,7 @@ function BasicInfoTab() {
 
 	const { userId, startDate } = watch() as WorkplanType;
 
-	const [isListening, setIsListening] = useState(false);
-
-	const handleDictation = () => {
-		const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-		if (!SpeechRecognition) {
-			alert('El navegador no soporta el reconocimiento de voz.');
-			return;
-		}
-
-		const recognition = new SpeechRecognition();
-		recognition.lang = 'es-ES';
-		recognition.continuous = false;
-		recognition.interimResults = false;
-
-		recognition.onstart = () => {
-			setIsListening(true);
-		};
-
-		recognition.onresult = (event: any) => {
-			const transcript = event.results[0][0].transcript;
-			const currentVal = watch('description') || '';
-			setValue('description', currentVal ? `${currentVal} ${transcript}` : transcript, { shouldDirty: true });
-		};
-
-		recognition.onerror = (event: any) => {
-			console.error('Speech recognition error:', event.error);
-			setIsListening(false);
-		};
-
-		recognition.onend = () => {
-			setIsListening(false);
-		};
-
-		recognition.start();
-	};
+	const { isListening, toggleListening: handleDictation } = useSpeechToText('description');
 
 	useEffect(() => {
 		if (!userId) {
@@ -121,12 +88,12 @@ function BasicInfoTab() {
 						<DateTimePicker
 							{...field}
 							className="mt-32"
-							value={parseISO(field.value as string)}
+							value={field.value ? (field.value instanceof Date ? field.value : parseISO(field.value as string)) : null}
 							format="dd-MM-yyyy hh:mm a"
 							slotProps={{
 								textField: {
 									id: 'startDate',
-									label: 'Fecha Inicio',
+									label: 'Fecha',
 									InputLabelProps: {
 										shrink: true
 									},
@@ -152,7 +119,7 @@ function BasicInfoTab() {
 						<DateTimePicker
 							{...field}
 							className="mt-32"
-							value={parseISO(field.value as string)}
+							value={field.value ? (field.value instanceof Date ? field.value : parseISO(field.value as string)) : null}
 							format="dd-MM-yyyy hh:mm a"
 							minDate={startDate}
 							slotProps={{

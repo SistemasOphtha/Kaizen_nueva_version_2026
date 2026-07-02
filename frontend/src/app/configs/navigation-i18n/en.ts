@@ -9,13 +9,17 @@ const locale = {
 	CALENDAR: 'Calendar',
 	PROJECT: 'Project',
 	DASHBOARDS: 'Dashboards',
-	PENDING_VISITS: 'Visits and Justifications',
+	PENDING_VISITS: 'Visitas and Justifications',
 	USERS: 'Users',
 	RECORDS: 'Records',
 	CLASSIFICATIONS: 'Classifications',
 	INDICATORS: 'Indicators',
 	REPORTS: 'Reports',
-	TUTORIAL: 'Tutorial'
+	TUTORIAL: 'Tutorial',
+	PENDIENTES: 'Pending',
+	CONSULTAS: 'Consultations',
+	INDICATORS_REPORTS: 'Indicators and Reports',
+	VISITS_AND_JUSTIFICATIONS: 'Visits and Justifications'
 };
 
 export default locale;

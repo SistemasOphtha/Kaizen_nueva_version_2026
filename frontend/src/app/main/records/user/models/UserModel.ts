@@ -13,7 +13,7 @@ const UserModel = (data: PartialDeep<UserType>): UserType =>
 		email: '',
 		phone: '',
 		mobile: '',
-		category: '',
+		categoryId: 0,
 		classificationId: 0,
 		regionId: 0,
 		status: '',
@@ -21,6 +21,14 @@ const UserModel = (data: PartialDeep<UserType>): UserType =>
 			id: 0,
 			name: '',
 			status: ''
+		},
+		userCategory: {
+			id: 0,
+			name: '',
+			canCreate: false,
+			canRead: false,
+			canUpdate: false,
+			canDelete: false
 		},
 		region: {
 			id: 0,

@@ -15,11 +15,20 @@ import FuseLoading from '@fuse/core/FuseLoading';
 import { Many } from 'lodash';
 import { WithRouterProps } from '@fuse/core/withRouter/withRouter';
 import * as React from 'react';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import { selectUser } from 'app/store/user/userSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { getThirds, removeThirdsBulk, selectThirds, selectSearchText } from '../store/thirdsSlice';
+import { assignThirdByAdmin } from '../store/thirdSlice';
 import ThirdsPartieTableHead from './ThirdsTableHead';
 import { ThirdType } from '../types/ThirdType';
+import axios from 'axios';
 
 type ProductsTableProps = WithRouterProps & {
 	navigate: (path: string) => void;
@@ -41,6 +50,10 @@ function ProductsTable(props: ProductsTableProps) {
 	const [data, setData] = useState<ThirdType[]>(thirds);
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+	const [usersList, setUsersList] = useState<any[]>([]);
+	const [selectedAssignUser, setSelectedAssignUser] = useState<any>(null);
+	const [assigning, setAssigning] = useState(false);
 	const [tableOrder, setTableOrder] = useState<{
 		direction: 'asc' | 'desc';
 		id: string;
@@ -70,8 +83,9 @@ function ProductsTable(props: ProductsTableProps) {
 						const classification = (third.third_classification?.name || '').toLowerCase();
 						const type = (third.third_type?.name || '').toLowerCase();
 						const region = (third.region?.name || '').toLowerCase();
+						const representative = third.thirds_portfolios?.map(p => `${p.portfolio?.user?.firstName || ''} ${p.portfolio?.user?.lastName || ''}`).join(' ').toLowerCase() || '';
 						
-						const fullText = `${name} ${additionalName} ${identification} ${email} ${city} ${specialty} ${classification} ${type} ${region}`;
+						const fullText = `${name} ${additionalName} ${identification} ${email} ${city} ${specialty} ${classification} ${type} ${region} ${representative}`;
 						return searchWords.every((word) => fullText.includes(word));
 					})
 				);
@@ -144,6 +158,52 @@ function ProductsTable(props: ProductsTableProps) {
 		}
 	};
 
+	const handleBulkAssign = async () => {
+		if (selected.length === 0 || !selectedAssignUser) return;
+		setAssigning(true);
+		try {
+			let assignedCount = 0;
+			for (const thirdIdStr of selected) {
+				const action = await dispatch(assignThirdByAdmin({ thirdId: Number(thirdIdStr), userId: selectedAssignUser.id }));
+				if (assignThirdByAdmin.fulfilled.match(action)) {
+					assignedCount++;
+				}
+			}
+			dispatch(
+				showMessage({
+					message: `${assignedCount} paneles asignados a ${selectedAssignUser.firstName} ${selectedAssignUser.lastName}`,
+					variant: 'success'
+				})
+			);
+			setSelected([]);
+			setAssignDialogOpen(false);
+			dispatch(getThirds());
+		} catch (error) {
+			dispatch(
+				showMessage({
+					message: 'Error al asignar paneles',
+					variant: 'error'
+				})
+			);
+		} finally {
+			setAssigning(false);
+		}
+	};
+
+	const openAssignDialog = async () => {
+		if (selected.length === 0) return;
+		setAssignDialogOpen(true);
+		setSelectedAssignUser(null);
+		if (usersList.length === 0) {
+			try {
+				const res = await axios.get('/api/users');
+				setUsersList(res.data);
+			} catch (error) {
+				console.error(error);
+			}
+		}
+	};
+
 	function handleClick(item: ThirdType) {
 		navigate(`/records/thirds/${item.id}`);
 	}
@@ -213,6 +273,7 @@ function ProductsTable(props: ProductsTableProps) {
 						onRequestSort={handleRequestSort}
 						rowCount={data.length}
 						onMenuItemClick={handleBulkDelete}
+						onAssignMenuItemClick={openAssignDialog}
 					/>
 
 					<TableBody>
@@ -234,7 +295,7 @@ function ProductsTable(props: ProductsTableProps) {
 						)
 							.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 							.map((n, index) => {
-								const isSelected = selected.indexOf(n.id.toString()) !== -1;
+								const isSelected = n.id ? selected.indexOf(n.id.toString()) !== -1 : false;
 								const labelId = `enhanced-table-checkbox-${index}`;
 								const userPortfolio = n.thirds_portfolios?.find(
 									(item) => item.portfolio && item.portfolio.userId === userId
@@ -250,7 +311,7 @@ function ProductsTable(props: ProductsTableProps) {
 										role="checkbox"
 										aria-checked={isSelected}
 										tabIndex={-1}
-										key={n.id}
+										key={n.id || index}
 										selected={isSelected}
 										onClick={() => handleClick(n)}
 									>
@@ -261,7 +322,7 @@ function ProductsTable(props: ProductsTableProps) {
 											<Checkbox
 												checked={isSelected}
 												onClick={(event) => event.stopPropagation()}
-												onChange={(event) => handleCheck(event, n.id.toString())}
+												onChange={(event) => handleCheck(event, n.id ? n.id.toString() : '')}
 												inputProps={{
 													'aria-labelledby': labelId
 												}}
@@ -330,6 +391,29 @@ function ProductsTable(props: ProductsTableProps) {
 				onPageChange={handleChangePage}
 				onRowsPerPageChange={handleChangeRowsPerPage}
 			/>
+			<Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} fullWidth maxWidth="sm">
+				<DialogTitle>Asignar a Representante</DialogTitle>
+				<DialogContent>
+					<Typography variant="body2" color="text.secondary" className="mb-16">
+						Seleccione el representante al que desea asignar {selected.length} panel(es).
+					</Typography>
+					<Autocomplete
+						options={usersList}
+						getOptionLabel={(option) => `${option.firstName} ${option.lastName} (${option.email})`}
+						value={selectedAssignUser}
+						onChange={(_, newValue) => setSelectedAssignUser(newValue)}
+						renderInput={(params) => <TextField {...params} label="Representante" variant="outlined" />}
+					/>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={() => setAssignDialogOpen(false)} disabled={assigning}>
+						Cancelar
+					</Button>
+					<Button onClick={handleBulkAssign} color="primary" variant="contained" disabled={assigning || !selectedAssignUser}>
+						{assigning ? 'Asignando...' : 'Asignar'}
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</div>
 	);
 }

@@ -7,6 +7,7 @@ import authRoles from '../../../auth/authRoles';
 
 const Config = lazy(() => import('./Config/Config'));
 const Holidays = lazy(() => import('./Holidays/Holidays'));
+const Communications = lazy(() => import('./Communications/Communications'));
 const ConfigApp = lazy(() => import('./ConfigApp'));
 
 /**
@@ -16,7 +17,7 @@ const ConfigAppConfig = {
 	settings: {
 		layout: {}
 	},
-	auth: authRoles.staff,
+	auth: authRoles.admin,
 	routes: [
 		{
 			path: 'settings',
@@ -33,6 +34,10 @@ const ConfigAppConfig = {
 				{
 					path: 'holidays',
 					element: <Holidays />
+				},
+				{
+					path: 'communications',
+					element: <Communications />
 				}
 			]
 		}

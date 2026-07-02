@@ -11,7 +11,8 @@ import { createUser,
     desapproveThird,
     approveThirdsBulk,
     desapproveThirdsBulk,
-    getSessionLogs } from '../controllers/user.controller';
+    getSessionLogs,
+    adminChangePassword } from '../controllers/user.controller';
 import { isAdmin, isCoordinatorOrAdmin, verifyToken } from '../middlewares/authJwt';
 import { checkExistingUser } from '../middlewares/verifySignup';
 
@@ -33,5 +34,6 @@ router.post("/:userId/thirds/desapprove-bulk", [verifyToken, isCoordinatorOrAdmi
 
 router.post("/restorePassword", restorePassword);
 router.post("/update-password", verifyToken, changePassword);
+router.post("/:userId/admin-change-password", [verifyToken, isAdmin], adminChangePassword);
 
 export default router;

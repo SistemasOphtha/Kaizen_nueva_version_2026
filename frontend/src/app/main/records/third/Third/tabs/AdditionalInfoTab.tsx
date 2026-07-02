@@ -42,6 +42,7 @@ function AdditionalInfoTab({ setTabValue }: Props) {
 	const [signatureModalOpen, setSignatureModalOpen] = useState(false);
 	const [isSavingSignature, setIsSavingSignature] = useState(false);
 	const [isUploadingFile, setIsUploadingFile] = useState(false);
+	const [viewerOpen, setViewerOpen] = useState(false);
 
 	const habeasDataConsent = watch('habeasDataConsent');
 	const habeasDataFileUrl = watch('habeasDataFileUrl');
@@ -440,6 +441,18 @@ function AdditionalInfoTab({ setTabValue }: Props) {
 					<Typography variant="h6" className="mb-12 font-bold text-16">
 						Consentimiento Habeas Data y Firma Digital
 					</Typography>
+
+					<Box className="mb-16 p-16 border-1 border-gray-300 rounded-4 bg-white max-h-192 overflow-y-auto">
+						<Typography variant="body2" color="text.secondary">
+							<strong>DOCUMENTO DE CONSENTIMIENTO GENERAL (Borrador)</strong>
+							<br /><br />
+							De acuerdo con lo establecido en la Ley Estatutaria 1581 de 2012 y sus decretos reglamentarios, autorizo de manera previa, expresa, libre y voluntaria a LABORATORIO OPTA, para que recolecte, almacene, use, circule y suprima mis datos personales.
+							<br /><br />
+							Entiendo que esta autorización se otorga para fines comerciales, operativos, de contacto y demás finalidades estrictamente relacionadas con la actividad de la empresa.
+							<br /><br />
+							<em>[El cliente enviará el texto definitivo para reemplazar este contenido].</em>
+						</Typography>
+					</Box>
 					
 					<Box className="flex flex-col gap-16 md:flex-row md:items-center">
 						<Box className="flex-1">
@@ -483,14 +496,14 @@ function AdditionalInfoTab({ setTabValue }: Props) {
 							{habeasDataFileUrl && (
 								<Typography variant="body2">
 									<strong>Documento cargado:</strong>{' '}
-									<a
-										href={habeasDataFileUrl.startsWith('/') ? `http://localhost:4001${habeasDataFileUrl}` : habeasDataFileUrl}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-blue-600 underline"
+									<Button
+										variant="text"
+										color="primary"
+										onClick={() => setViewerOpen(true)}
+										className="underline"
 									>
 										Ver Documento
-									</a>
+									</Button>
 								</Typography>
 							)}
 
@@ -567,6 +580,31 @@ function AdditionalInfoTab({ setTabValue }: Props) {
 						disabled={isSavingSignature}
 					>
 						{isSavingSignature ? 'Guardando...' : 'Guardar Firma'}
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			<Dialog
+				open={viewerOpen}
+				onClose={() => setViewerOpen(false)}
+				maxWidth="lg"
+				fullWidth
+			>
+				<DialogTitle>Documento Habeas Data</DialogTitle>
+				<DialogContent>
+					{habeasDataFileUrl && (
+						<iframe
+							src={habeasDataFileUrl.startsWith('/') ? `http://localhost:4001${habeasDataFileUrl}` : habeasDataFileUrl}
+							width="100%"
+							height="600px"
+							style={{ border: 'none' }}
+							title="Documento Habeas Data"
+						/>
+					)}
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={() => setViewerOpen(false)} color="primary">
+						Cerrar
 					</Button>
 				</DialogActions>
 			</Dialog>

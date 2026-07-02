@@ -32,7 +32,7 @@ export type UserType = {
 	email: string;
 	phone: string;
 	mobile: string;
-	category: string;
+	categoryId: number;
 	classificationId: number;
 	regionId: number;
 	status: string;
@@ -45,6 +45,14 @@ export type UserType = {
 		id: number;
 		name: string;
 		status: string;
+	};
+	userCategory?: {
+		id: number;
+		name: string;
+		canCreate: boolean;
+		canRead: boolean;
+		canUpdate: boolean;
+		canDelete: boolean;
 	};
 	portfolios: [PortfolioType];
 };

@@ -9,10 +9,10 @@ import { selectFuseCurrentLayoutConfig, selectToolbarTheme } from 'app/store/fus
 import AdjustFontSize from '../../shared-components/AdjustFontSize';
 import FullScreenToggle from '../../shared-components/FullScreenToggle';
 import LanguageSwitcher from '../../shared-components/LanguageSwitcher';
-import NotificationPanelToggleButton from '../../shared-components/notificationPanel/NotificationPanelToggleButton';
+// import NotificationPanelToggleButton from '../../shared-components/notificationPanel/NotificationPanelToggleButton';
 import NavigationSearch from '../../shared-components/NavigationSearch';
 import UserMenu from '../../shared-components/UserMenu';
-import QuickPanelToggleButton from '../../shared-components/quickPanel/QuickPanelToggleButton';
+// import QuickPanelToggleButton from '../../shared-components/quickPanel/QuickPanelToggleButton';
 import Logo from '../../shared-components/Logo';
 import NavbarToggleButton from '../../shared-components/NavbarToggleButton';
 import { Layout3ConfigDefaultsType } from '../Layout3Config';
@@ -66,8 +66,8 @@ function ToolbarLayout3(props: ToolbarLayout3Props) {
 						<LanguageSwitcher />
 						<AdjustFontSize />
 						<FullScreenToggle />
-						<QuickPanelToggleButton />
-						<NotificationPanelToggleButton />
+						{/* <QuickPanelToggleButton /> */}
+						{/* <NotificationPanelToggleButton /> */}
 						<UserMenu />
 					</div>
 				</Toolbar>

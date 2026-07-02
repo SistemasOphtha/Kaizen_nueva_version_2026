@@ -135,11 +135,19 @@ const getJustificationById = async (req: any, res: any) => {
 const getJustifications = async (req: any, res: any) => {
   const userId = req.userId;
   const rol = req.rol;
+  const filters = req.query;
 
   if (rol === 'Administrador' || rol === 'Coordinador') {
-    let userWhereClause = {};
+    let userWhereClause: any = {};
     if (rol === 'Coordinador') {
       userWhereClause = { coordinatorId: userId };
+    } else if (rol === 'Administrador' && filters.userId && filters.userId != '0') {
+      userWhereClause = { id: filters.userId };
+    }
+
+    let thirdWhereClause: any = {};
+    if (filters.regionId && filters.regionId != '0') {
+      thirdWhereClause = { regionId: filters.regionId };
     }
 
     const justifications = await Justification.findAll(
@@ -147,7 +155,8 @@ const getJustifications = async (req: any, res: any) => {
         include: [
           {
             model: Third,
-            required: true
+            required: true,
+            where: thirdWhereClause
           },
           {
             model: User,

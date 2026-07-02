@@ -176,15 +176,60 @@ function UserHeader() {
 						userRole={['Administrador']}
 						loginRedirectUrl="/"
 					>
-						<Button
-							className="whitespace-nowrap mx-4"
-							variant="contained"
-							color="error"
-							onClick={handleOpenDialog}
-							startIcon={<FuseSvgIcon className="hidden sm:flex">heroicons-outline:trash</FuseSvgIcon>}
-						>
-							Eliminar
-						</Button>
+						<>
+							<Button
+								className="whitespace-nowrap mx-4"
+								variant="contained"
+								color="info"
+								onClick={() => {
+									const email = getValues('email');
+									if (email) {
+										dispatch(
+											showMessage({
+												message: 'Enviando nueva contraseña...',
+												variant: 'info'
+											})
+										);
+										fetch('/api/auth/restore-password', {
+											method: 'POST',
+											headers: {
+												'Content-Type': 'application/json',
+												'Authorization': `Bearer ${localStorage.getItem('jwt_access_token')}`
+											},
+											body: JSON.stringify({ email })
+										}).then((res) => {
+											if (res.ok) {
+												dispatch(
+													showMessage({
+														message: 'Contraseña restablecida y enviada por correo',
+														variant: 'success'
+													})
+												);
+											} else {
+												dispatch(
+													showMessage({
+														message: 'Error al restablecer contraseña',
+														variant: 'error'
+													})
+												);
+											}
+										});
+									}
+								}}
+								startIcon={<FuseSvgIcon className="hidden sm:flex">heroicons-outline:key</FuseSvgIcon>}
+							>
+								Restablecer Clave
+							</Button>
+							<Button
+								className="whitespace-nowrap mx-4"
+								variant="contained"
+								color="error"
+								onClick={handleOpenDialog}
+								startIcon={<FuseSvgIcon className="hidden sm:flex">heroicons-outline:trash</FuseSvgIcon>}
+							>
+								Eliminar
+							</Button>
+						</>
 					</FuseAuthorization>
 				)}
 				<Button

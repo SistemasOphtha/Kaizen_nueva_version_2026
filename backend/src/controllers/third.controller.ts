@@ -440,12 +440,34 @@ const updateThirdById = async (req: any, res: any) => {
       });
     });
 
+    const updatedThird = await Third.findOne({
+      include: [
+        { model: ThirdType, attributes: ["id", "name"] },
+        { model: ThirdClassification, attributes: ["id", "name"] },
+        { model: ThirdSpecialty, attributes: ["id", "name"] },
+        { model: ThirdSubSpecialty, attributes: ["id", "name"] },
+        { model: Region, attributes: ["id", "name"] },
+        {
+          model: ThirdsPortfolio,
+          required: false,
+          include: [
+            {
+              model: Portfolio,
+              required: false,
+              include: [
+                { model: User, required: false, attributes: ["id", "firstName", "lastName", "email"] }
+              ]
+            }
+          ]
+        }
+      ],
+      where: { id: thirdId }
+    });
+
     logger.info(`Tercero con ID ${thirdId} actualizado correctamente`);
+    const plainThird = updatedThird.get({ plain: true });
     return res.status(200).json(
-      SuccessResponseDTO("Tercero actualizado correctamente", {
-        ...thirdData,
-        id: thirdId
-      })
+      SuccessResponseDTO("Tercero actualizado correctamente", ThirdResponseDTO(plainThird))
     );
   } catch (error) {
     logger.error(`Error al actualizar tercero con ID: ${req.params.thirdId}`, error);
@@ -671,6 +693,48 @@ const unassignThirdsPortfolioByAdminBulk = async (req: any, res: any) => {
     logger.error(`Error al desasignar múltiples terceros del portafolio por admin para el usuario ${req.params.userId}`, error);
     return res.status(500).json(
       ErrorResponseDTO("Error al desasignar los terceros seleccionados del portafolio")
+    );
+  }
+};
+
+const assignThirdsPortfolioByAdminBulk = async (req: any, res: any) => {
+  try {
+    const { userId } = req.params;
+    const { thirdIds } = req.body;
+
+    if (!Array.isArray(thirdIds) || thirdIds.length === 0) {
+      return res.status(400).json(
+        ErrorResponseDTO("Debe proporcionar una lista de IDs de terceros para asignar")
+      );
+    }
+
+    const uniqueIds = [...new Set(thirdIds.map((id) => Number(id)))].filter((id) => Number.isInteger(id));
+
+    if (uniqueIds.length === 0) {
+      return res.status(400).json(
+        ErrorResponseDTO("Los IDs proporcionados no son válidos")
+      );
+    }
+
+    const result = {
+      assigned: [],
+      failed: []
+    };
+
+    for (const thirdId of uniqueIds) {
+      try {
+        await portfolioService.assignThirdToUserPortfolio(thirdId, Number(userId), true);
+        result.assigned.push(thirdId);
+      } catch (error) {
+        result.failed.push({ id: thirdId, reason: error.message || 'ERROR' });
+      }
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    logger.error(`Error al asignar múltiples terceros al portafolio por admin para el usuario ${req.params.userId}`, error);
+    return res.status(500).json(
+      ErrorResponseDTO("Error al asignar los terceros seleccionados al portafolio")
     );
   }
 };
@@ -921,6 +985,7 @@ export {
   assignThirdPortfolioByAdmin,
   assignOrCreateThird,
   unassignThirdsPortfolioByAdminBulk,
+  assignThirdsPortfolioByAdminBulk,
   uploadHabeasData,
   saveSignature
 };

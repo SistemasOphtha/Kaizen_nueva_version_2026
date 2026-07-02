@@ -24,6 +24,11 @@ function ConfigTabs() {
       label: 'Días Festivos',
       icon: 'heroicons-outline:calendar',
       path: '/settings/holidays'
+    },
+    {
+      label: 'Comunicaciones',
+      icon: 'heroicons-outline:mail',
+      path: '/settings/communications'
     }
   ];
 

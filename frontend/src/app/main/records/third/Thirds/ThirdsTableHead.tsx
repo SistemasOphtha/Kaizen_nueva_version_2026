@@ -109,6 +109,7 @@ type ThirdsTableHeadPropsType = {
 	};
 	rowCount: number;
 	onMenuItemClick: () => void;
+	onAssignMenuItemClick: () => void;
 };
 
 /**
@@ -175,6 +176,17 @@ function ThirdsTableHead(props: ThirdsTableHeadPropsType) {
 								onClose={closeSelectedThirdsMenu}
 							>
 								<MenuList>
+									<MenuItem
+										onClick={() => {
+											props.onAssignMenuItemClick();
+											closeSelectedThirdsMenu();
+										}}
+									>
+										<ListItemIcon className="min-w-40">
+											<FuseSvgIcon>heroicons-outline:user-add</FuseSvgIcon>
+										</ListItemIcon>
+										<ListItemText primary="Asignar a Representante" />
+									</MenuItem>
 									<MenuItem
 										onClick={() => {
 											// dispatch(removeThirds(selectedThirdIds));
